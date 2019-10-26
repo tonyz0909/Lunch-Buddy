@@ -2,14 +2,6 @@ import React, { Component } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Input, ListItem, Text } from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
-import {
-  View,
-  Text,
-  TouchableHighlight,
-  StyleSheet,
-  TextInput,
-  AlertIOS
-} from 'react-native';
 
 import { db } from '../src/config';
 
