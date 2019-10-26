@@ -3,6 +3,12 @@ import { ActivityIndicator, ScrollView, StyleSheet, View, Image } from 'react-na
 import { Button, Divider, Input, ListItem, Text } from 'react-native-elements';
 import { ExpoConfigView } from '@expo/samples';
 import profileImg from '../assets/images/profile_avatar.png';
+import PropTypes from 'prop-types';
+import RequestComponent from '../components/RequestComponent';
+
+import { db } from '../src/config';
+
+let itemsRef = db.ref('/items');
 
 export default class SettingsScreen extends Component {
 
@@ -15,6 +21,14 @@ export default class SettingsScreen extends Component {
       email: 'tonyz0909@gmail.com',
       password: '*****'
     };
+  }
+
+  componentDidMount() {
+    itemsRef.on('value', snapshot => {
+      let data = snapshot.val();
+      let items = Object.values(data);
+      this.setState({ items });
+    });
   }
 
   old = () => {
@@ -89,6 +103,16 @@ export default class SettingsScreen extends Component {
     );
   }
 }
+
+/*
+<View style={styles.container}>
+        {this.state.items.length > 0 ? (
+          <RequestComponent items={this.state.items} />
+        ) : (
+          <Text>No items</Text>
+        )}
+      </View>
+      */
 
 const AppIconPreview = ({ iconUrl }) => {
   if (!iconUrl) {

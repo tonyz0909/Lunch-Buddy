@@ -2,6 +2,22 @@ import React, { Component } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Input, ListItem, Text } from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
+import {
+  View,
+  Text,
+  TouchableHighlight,
+  StyleSheet,
+  TextInput,
+  AlertIOS
+} from 'react-native';
+
+import { db } from '../src/config';
+
+let addItem = item => {
+  db.ref('/items').push({
+    name: item
+  });
+}
 
 export default class LinksScreen extends Component {
   constructor(props) {
@@ -86,7 +102,7 @@ export default class LinksScreen extends Component {
                     subtitle={<Input
                       placeholder={this.state.location}
                       onChangeText={text => this.setState({ edits: { ...this.state.edits, location: text } })} />}
-                      bottomDivider
+                    bottomDivider
                   />
                   <ListItem
                     key={1}
@@ -94,7 +110,7 @@ export default class LinksScreen extends Component {
                     subtitle={<Input
                       placeholder={this.state.start}
                       onChangeText={text => this.setState({ edits: { ...this.state.edits, start: text } })} />}
-                      bottomDivider
+                    bottomDivider
                   />
                   <ListItem
                     key={2}
@@ -102,7 +118,7 @@ export default class LinksScreen extends Component {
                     subtitle={<Input
                       placeholder={this.state.end}
                       onChangeText={text => this.setState({ edits: { ...this.state.edits, end: text } })} />}
-                      bottomDivider
+                    bottomDivider
                   />
                   <View style={styles.fixToText}>
                     <Button title="Cancel" buttonStyle={styles.button} raised={true} onPress={() => this.setState({ view: "view" })} />
@@ -128,8 +144,40 @@ LinksScreen.navigationOptions = {
   title: 'Your Lunch Requests',
 };
 
+// export default class LinksScreen extends Component {
+//   state = {
+//     name: ''
+//   };
+
+//   handleChange = e => {
+//     this.setState({
+//       name: e.nativeEvent.text
+//     });
+//   };
+//   handleSubmit = () => {
+//     addItem(this.state.name);
+//     AlertIOS.alert('Item saved successfully');
+//   };
+
+//   render() {
+//     return (
+//       <View style={styles.main}>
+//         <Text style={styles.title}>Add Item</Text>
+//         <TextInput style={styles.itemInput} onChange={this.handleChange} />
+//         <TouchableHighlight
+//           style={styles.button}
+//           underlayColor="white"
+//           onPress={this.handleSubmit}
+//         >
+//           <Text style={styles.buttonText}>Add</Text>
+//         </TouchableHighlight>
+//       </View>
+//     );
+//   }
+// }
+
 const styles = StyleSheet.create({
-  container: {
+  main: {
     flex: 1,
     paddingTop: 15,
     backgroundColor: '#ffffff',
