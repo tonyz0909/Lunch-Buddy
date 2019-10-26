@@ -7,6 +7,7 @@ import LoginScreen from '../screens/LoginScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import LinksScreen from '../screens/LinksScreen';
 import HomeScreen from '../screens/HomeScreen';
+import RegistrationScreen from '../screens/RegistrationScreen'
 
 export default createAppContainer(
   createSwitchNavigator({
@@ -17,6 +18,7 @@ export default createAppContainer(
     Home: HomeScreen,
     Links: LinksScreen,
     Settings: SettingsScreen,
+    Registration: RegistrationScreen
   },
   {
     initialRouteName: 'Login',
