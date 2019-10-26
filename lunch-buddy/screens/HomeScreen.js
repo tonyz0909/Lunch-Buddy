@@ -61,7 +61,8 @@ export default class HomeScreen extends Component {
       startTime: this.lunchstartstring,
       endTime: this.lunchendstring
     }
-    Alert.alert(request);
+    console.log(request); 
+    Alert.alert("test");
   }
 
   render() {
