@@ -1,18 +1,16 @@
 import * as WebBrowser from 'expo-web-browser';
 import React, { Component } from 'react';
 import {
-  Button,
   Image,
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 
 
-import {Input, Icon} from 'react-native-elements'; 
+import {Button, Input, Icon, Text, ListItem} from 'react-native-elements'; 
 import { MonoText } from '../components/StyledText';
 import DateTimePicker from "react-native-modal-datetime-picker";
 
@@ -21,22 +19,31 @@ export default class HomeScreen extends Component {
     super(props);
     this.state = {
       isDateTimePickerVisible: false,
-      isDateTimePicker2Visible: false
+      isDateTimePickerVisible2: false
     };
     this.lunchstartstring = "test"
-    this.lunchstarttime="test2"
+    this.lunchendstring = "test1"
   }
   showDateTimePicker = () => {
     this.setState({ isDateTimePickerVisible: true });
   };
-
   hideDateTimePicker = () => {
     this.setState({ isDateTimePickerVisible: false });
   };
   handleDatePicked = date => {
-    console.log("A date has been picked: ", date);
     this.lunchstartstring = date.toString(); 
     this.hideDateTimePicker();
+  };
+
+  showDateTimePicker2 = () => {
+    this.setState({ isDateTimePickerVisible2: true });
+  };
+  hideDateTimePicker2 = () => {
+    this.setState({ isDateTimePickerVisible2: false });
+  };
+  handleDatePicked2 = date => {
+    this.lunchendstring = date.toString();
+    this.hideDateTimePicker2();
   };
 
   render() {
@@ -47,34 +54,58 @@ export default class HomeScreen extends Component {
           contentContainerStyle={styles.contentContainer}>
 
           <View style={styles.inputs}>
-            <Input
-              placeholder=" Enter Location "
-              leftIcon={
-                <Icon
-                  name='map'
-                  size={24}
-                  color='black'
+            <ListItem
+              key={0}
+              title={<Text style={styles.boldText}>{"Lunch Times:"}</Text>}
+              subtitle={
+                <View style={styles.fixToText}>
+                  <Input
+                    placeholder=" Enter Location "
+                    leftIcon={
+                      <Icon
+                        name='map'
+                        size={24}
+                        color='black'
+                      />
+                    }
+                  /> 
+                </View>}
+              bottomDivider
+            />   
+          </View> 
+          
+
+          <View style={styles.inputs}> 
+            <ListItem
+              key={0}
+              title={<Text style={styles.boldText}>{"Lunch Times:"}</Text>}
+              subtitle={
+                <View style={styles.fixToText}>
+                <Button title="Start" onPress={this.showDateTimePicker} buttonStyle={styles.button} />
+                <DateTimePicker
+                  isVisible={this.state.isDateTimePickerVisible}
+                  onConfirm={this.handleDatePicked}
+                  onCancel={this.hideDateTimePicker}
+                  datePickerModeAndroid="calendar"
+                  mode="datetime"
                 />
-              }
-            />    
+
+                <Button title="End" onPress={this.showDateTimePicker2} buttonStyle={styles.button} />
+                <DateTimePicker
+                  isVisible={this.state.isDateTimePickerVisible2}
+                  onConfirm={this.handleDatePicked2}
+                  onCancel={this.hideDateTimePicker2}
+                  datePickerModeAndroid="calendar"
+                  mode="datetime"
+                />
+                </View>}
+              bottomDivider
+            />
           </View> 
 
-          <View> 
-            <Text> 
-              Lunch Start: 
-            </Text> 
-            <Button title="Select Date/Time" onPress={this.showDateTimePicker} />
-            <DateTimePicker
-              isVisible={this.state.isDateTimePickerVisible}
-              onConfirm={this.handleDatePicked}
-              onCancel={this.hideDateTimePicker}
-              datePickerModeAndroid="calendar"
-              mode="datetime"
-            />
-            <Text style={styles.getStartedText}>
-              {this.lunchstartstring}
-            </Text>
-          </View> 
+          <Text style={styles.getStartedText}>
+            {this.lunchstartstring}
+          </Text>
         </ScrollView>
       </View>
     );
@@ -108,6 +139,10 @@ function DevelopmentModeNotice() {
   }
 }
 
+HomeScreen.navigationOptions = {
+  title: "Create Request",
+};
+
 function handleLearnMorePress() {
   WebBrowser.openBrowserAsync(
     'https://docs.expo.io/versions/latest/workflow/development-mode/'
@@ -122,9 +157,24 @@ function handleHelpPress() {
 
 const styles = StyleSheet.create({
 
-  input: {
+  inputs: {
     flex: 1, 
-    flexDirection: "row",
+  },
+  boldText: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  ratingText: { 
+    fontSize: 20,
+    color: 'grey',
+  },
+  fixToText: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    margin: 10
+  },
+  button: {
+    width: 160
   },
 
   container: {
