@@ -80,7 +80,6 @@ export default class HomeScreen extends Component {
 
   handleSubmit= () => {
     var user = fbase.auth().currentUser; 
-    console.log(user);
     var db = fbase.firestore();
     var profileRef = db.collection("requests").doc(user.uid);
     profileRef.set({
@@ -100,7 +99,7 @@ export default class HomeScreen extends Component {
       startTime: this.state.lunchStartDateTime,
       endTime: this.state.lunchEndDateTime,
     }
-    console.log(request); 
+    //console.log(request); 
     //firebase entry
     this.handleSubmit();
     Alert.alert("request saved");
