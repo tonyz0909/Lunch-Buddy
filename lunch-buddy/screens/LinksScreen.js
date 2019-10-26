@@ -35,18 +35,43 @@ export default class LinksScreen extends Component {
     profileRef.get().then(doc => {
       if (doc.exists) {
         console.log("Document data:", doc.data());
-        this.setState({
-          location: doc.data().placeID.toString(),
-          start: doc.data().startTime.toString(),
-          end: doc.data().endTime.toString(),
-          matched: doc.data().matched,
-          match: doc.data().matchID,
-          edits: {
-            location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
-            start: "11:30am",
-            end: "1:30pm",
-          }
+        // console.log("Start Time:", doc.data().startTime.toDate().toLocaleTimeString('en-US'))
+        
+        let url = 'https://maps.googleapis.com/maps/api/place/details/json?';
+        let place_id = "place_id=" + doc.data().placeID.toString();
+        let fields = "fields=name,formatted_address"
+        let key = "key=" + API["googlemaps"]
+        let requestReverseGeoCode = url + place_id + "&" + fields + "&" + key
+
+        fetch("https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJx9EaGRoE9YgR7Je8EHoBBRo&fields=name,formatted_address&key=AIzaSyCwt1IlfjmH9cOk3FOLkMr4sORPsL5PT68", {
+          "method": "GET",
+          "headers": {}
+        })
+        .then(response => response.json())
+        .then((data => {
+          console.log("fetch response: " + JSON.stringify(data)); 
+          let locationString = data.result.name + ", " + data.result.formatted_address 
+          this.setState({
+            location: locationString,
+            start: doc.data().startTime.toDate().toLocaleTimeString('en-US'),
+            end: doc.data().endTime.toDate().toLocaleTimeString('en-US'),
+            matched: doc.data().matched,
+            match: doc.data().matchID,
+            edits: {
+              location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
+              start: "11:30am",
+              end: "1:30pm",
+            }
+          });
+
+        }))
+        .catch(err => {
+          console.log(err); 
         });
+
+        
+
+
     } else {
         // doc.data() will be undefined in this case
         console.log("No such document!");
