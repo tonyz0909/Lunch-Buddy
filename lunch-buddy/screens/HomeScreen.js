@@ -1,6 +1,7 @@
 import * as WebBrowser from 'expo-web-browser';
 import React, { Component } from 'react';
 import {
+  Alert,
   Image,
   Platform,
   ScrollView,
@@ -10,7 +11,7 @@ import {
 } from 'react-native';
 
 
-import {Button, Input, Icon, Text, ListItem} from 'react-native-elements';
+import { Button, Input, Icon, Text, ListItem } from 'react-native-elements';
 import { MonoText } from '../components/StyledText';
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
@@ -40,10 +41,12 @@ export default class HomeScreen extends Component {
     this.state = {
       isDateTimePickerVisible: false,
       isDateTimePickerVisible2: false,
-      locationPlaceID: "[placeidhere]"
+      locationPlaceID: "[placeidhere]", //string - place_id
+      lunchStartDateTime: new Date(), // datetime object - start 
+      lunchEndDateTime: new Date(), // datetime object - end 
     };
-    this.lunchstartstring = "start string"
-    this.lunchendstring = "end string"
+    this.lunchstartstring = "start string" // TEST start date time string 
+    this.lunchendstring = "end string" // TEST end date time string 
   }
 
   showDateTimePicker = () => {
@@ -54,6 +57,7 @@ export default class HomeScreen extends Component {
   };
   handleDatePicked = date => {
     this.lunchstartstring = date.toString();
+    this.setState({lunchStartDateTime:date}); 
     this.hideDateTimePicker();
   };
 
@@ -65,11 +69,22 @@ export default class HomeScreen extends Component {
   };
   handleDatePicked2 = date => {
     this.lunchendstring = date.toString();
+    this.setState({lunchEndDateTime: date});
     this.hideDateTimePicker2();
   };
 
   handleLocationPicked = str => {
-    this.setState({locationPlaceID: str});
+    this.setState({ locationPlaceID: str });
+  }
+
+  submit = () => {
+    let request = { 
+      location: this.state.locationPlaceID,
+      startTime: this.state.lunchStartDateTime,
+      endTime: this.state.lunchEndDateTime,
+    }
+    console.log(request); 
+    Alert.alert("test"); //Just to not crash stuff 
   }
 
   render() {
@@ -81,11 +96,11 @@ export default class HomeScreen extends Component {
           <View style={styles.inputs}>
             <ListItem
               key={0}
-              title={<Text style={styles.boldText}>{"Lunch Times:"}</Text>}
+              title={<Text style={styles.boldText}>{"Enter Location:"}</Text>}
               subtitle={
                 <View style={styles.fixToText}>
                   <GooglePlacesAutocomplete
-                    placeholder='Enter Location'
+                    placeholder='Location Search'
                     minLength={2}
                     autoFocus={false}
                     returnKeyType={'search'}
@@ -118,7 +133,7 @@ export default class HomeScreen extends Component {
           <View style={styles.inputs}>
             <ListItem
               key={0}
-              title={<Text style={styles.boldText}>{"Lunch Times:"}</Text>}
+              title={<Text style={styles.boldText}>{"Start Time:"}</Text>}
               subtitle={
                 <View style={styles.fixToText}>
                 <Button title="Start" onPress={this.showDateTimePicker} buttonStyle={styles.button} />
@@ -129,7 +144,14 @@ export default class HomeScreen extends Component {
                   datePickerModeAndroid="calendar"
                   mode="datetime"
                 />
-
+                </View>}
+              bottomDivider
+            />
+            <ListItem 
+              key={1}
+              title={<Text style={styles.boldText}>{"End Times:"}</Text>}
+              subtitle={
+                <View style={styles.fixToText}>
                 <Button title="End" onPress={this.showDateTimePicker2} buttonStyle={styles.button} />
                 <DateTimePicker
                   isVisible={this.state.isDateTimePickerVisible2}
@@ -139,7 +161,7 @@ export default class HomeScreen extends Component {
                   mode="datetime"
                 />
                 </View>}
-              bottomDivider
+                bottomDivider
             />
           </View>
 
@@ -153,6 +175,9 @@ export default class HomeScreen extends Component {
           <Text style={styles.getStartedText}>
             This is a string: {this.state.locationPlaceID}
           </Text>
+          <View style={styles.fixToText}>
+            <Button title="Submit Request!" buttonStyle={styles.button} raised={true} onPress={this.submit} />
+          </View>
         </ScrollView>
       </View>
     );
@@ -223,7 +248,6 @@ const styles = StyleSheet.create({
   button: {
     width: 160
   },
-
   container: {
     flex: 1,
     backgroundColor: '#fff',
