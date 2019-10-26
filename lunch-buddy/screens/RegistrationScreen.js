@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     justifyContent: 'center'
   },
+  
   finishButton: {
     padding: 10,
     paddingTop: 20
