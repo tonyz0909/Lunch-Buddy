@@ -54,7 +54,6 @@ export default class HomeScreen extends Component {
     this.setState({locationPlaceID: str});
   }
 
-
   render() {
     return (
       <View style={styles.container}>
