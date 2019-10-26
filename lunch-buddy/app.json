@@ -25,6 +25,11 @@
     ],
     "ios": {
       "supportsTablet": true
+    },
+    "extra": {
+      "facebook" : {
+        "appID" : "592476948187357"
+      }
     }
   }
 }
