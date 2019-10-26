@@ -14,7 +14,7 @@ import {Button, Input, Icon, Text, ListItem} from 'react-native-elements';
 import { MonoText } from '../components/StyledText';
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
- 
+import API from '../api.json';  
 
 export default class HomeScreen extends Component {
   constructor(props) {
@@ -22,10 +22,10 @@ export default class HomeScreen extends Component {
     this.state = {
       isDateTimePickerVisible: false,
       isDateTimePickerVisible2: false,
-      locationPlaceID: "Before: "
+      locationPlaceID: "[placeidhere]"
     };
-    this.lunchstartstring = "test"
-    this.lunchendstring
+    this.lunchstartstring = "start string"
+    this.lunchendstring = "end string"
   }
 
   showDateTimePicker = () => {
@@ -54,7 +54,10 @@ export default class HomeScreen extends Component {
     this.setState({locationPlaceID: str});
   }
 
+  
   render() {
+    console.log(API);
+    console.log(API["googlemaps"]);
     return (
       <View style={styles.container}>
         <ScrollView
@@ -67,16 +70,32 @@ export default class HomeScreen extends Component {
               title={<Text style={styles.boldText}>{"Lunch Times:"}</Text>}
               subtitle={
                 <View style={styles.fixToText}>
-                  <Input
-                    placeholder=" Enter Location "
-                    leftIcon={
-                      <Icon
-                        name='map'
-                        size={24}
-                        color='black'
-                      />
-                    }
-                  /> 
+                  <GooglePlacesAutocomplete
+                    placeholder='Enter Location'
+                    minLength={2}
+                    autoFocus={false}
+                    returnKeyType={'search'}
+                    listViewDisplayed='true'
+                    fetchDetails={true}
+                    renderDescription={row => row.description}
+                    onPress={
+                      (data, details = null) => { // 'details' is provided when fetchDetails = true
+                        console.log(data.place_id)
+                        this.handleLocationPicked(data.place_id)
+                      }}
+                    getDefaultValue={() => ''}
+                    query={{
+                      // available options: https://developers.google.com/places/web-service/autocomplete
+                      key: 'AIzaSyCwt1IlfjmH9cOk3FOLkMr4sORPsL5PT68',
+                      language: 'en', // language of the results
+                    }}
+                    currentLocation={true} // Will add a 'Current location' button at the top of the predefined places list
+                    nearbyPlacesAPI='GooglePlacesSearch'
+                    GooglePlacesSearchQuery={{
+                      // available options for GooglePlacesSearch API : https://developers.google.com/places/web-service/search
+                      rankby: 'distance',
+                    }}
+                  />
                 </View>}
               bottomDivider
             />   
@@ -116,32 +135,7 @@ export default class HomeScreen extends Component {
           </Text>
 
           <View> 
-            <GooglePlacesAutocomplete 
-              placeholder='location'
-              minLength={2}
-              autoFocus={false}
-              returnKeyType={'search'}
-              listViewDisplayed='true'
-              fetchDetails={true}
-              renderDescription={row => row.description}
-              onPress={
-                (data, details = null) => { // 'details' is provided when fetchDetails = true
-                console.log(data.place_id)
-                this.handleLocationPicked(data.place_id)
-              }}
-              getDefaultValue={() => ''}
-              query={{
-                // available options: https://developers.google.com/places/web-service/autocomplete
-                key: 'AIzaSyCwt1IlfjmH9cOk3FOLkMr4sORPsL5PT68',
-                language: 'en', // language of the results
-              }}
-              currentLocation={true} // Will add a 'Current location' button at the top of the predefined places list
-              nearbyPlacesAPI='GooglePlacesSearch' 
-              GooglePlacesSearchQuery={{
-                // available options for GooglePlacesSearch API : https://developers.google.com/places/web-service/search
-                rankby: 'distance',
-              }}
-            />
+            
           </View> 
           <Text style={styles.getStartedText}>
             This is a string: {this.state.locationPlaceID}
