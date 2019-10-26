@@ -11,71 +11,84 @@ import {
 } from 'react-native';
 // import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button } from 'react-native-elements';
-import { firebaseapp as firebase } from '../src/config';
+import { firebaseapp as fbase, db } from '../src/config';
 // import { Facebook } from 'expo';
 import * as Facebook from 'expo-facebook';
-import * as Constants from 'expo-constants';
 // import { AccessToken, LoginButton } from 'react-native-fbsdk';
-import FBLoginButton from './FBLoginButton';
 
 export default class LoginScreen extends Component {
+  // async signInWithFacebook() {
+  //   var provider = new fbase.auth.FacebookAuthProvider();
+  //   fbase.auth().signInWithRedirect(provider);
 
-  // state = {
-  //   email: '',
-  //   password: '',
-  //   errorMessage: '',
-  // };
+  //   fbase.auth().getRedirectResult().then(function(result) {
+  //     if (result.credential) {
+  //       // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+  //       var token = result.credential.accessToken;
+  //       // ...
+  //     }
+  //     // The signed-in user info.
+  //     var user = result.user;
 
-  async loginHandler() {
-    const FBSDK = require('react-native-fbsdk');
-    const {
-      LoginManager,
-    } = FBSDK;
-
-    const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
-    if (result.isCancelled) {
-      throw new Error('User cancelled the login process');
-    }
-
-    const data = await AccessToken.getCurrentAccessToken();
-    if (!data) {
-      throw new Error('Something went wrong obtaining access token');
-    }
-
-    const credential = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
-    await firebase.auth().signInWithCredential(credential);
-  }
+  //     console.log(result);
+  //   }).catch(function(error) {
+  //     // Handle Errors here.
+  //     var errorCode = error.code;
+  //     var errorMessage = error.message;
+  //     // The email of the user's account used.
+  //     var email = error.email;
+  //     // The firebase.auth.AuthCredential type that was used.
+  //     var credential = error.credential;
+  //     // ...
+  //   });
+  // }
 
   async signInWithFacebook() {
     const appId = "592476948187357";
     const permissions = ['public_profile', 'email'];  // Permissions required, consult Facebook docs
-    console.log(1);
-    const {
-      type,
-      token,
-    } = await Facebook.logInWithReadPermissionsAsync(
-      appId,
-      {permissions}
-    );
-    console.log(2);
-    switch (type) {
-      case 'success': {
-        console.log(3);
-        await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);  // Set persistent auth state
-        const credential = firebase.auth.FacebookAuthProvider.credential(token);
-        const facebookProfileData = await firebase.auth().signInAndRetrieveDataWithCredential(credential);  // Sign in with Facebook credential
-  
-        // Do something with Facebook profile data
-        // OR you have subscribed to auth state change, authStateChange handler will process the profile data
-        console.log("successful auth")
-        return Promise.resolve({type: 'success'});
+    
+    try {
+      const {type, token} = await Facebook.logInWithReadPermissionsAsync(
+        appId, {permissions});
+      switch (type) {
+        case 'success': {
+          const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`);
+          var userInfo = await response.json();
+          console.log(userInfo);
+          this.signInFirebaseAccount(userInfo);
+
+          return Promise.resolve({type: 'success'});
+        }
+        case 'cancel': {
+          console.log("authentication cancelled")
+          return Promise.reject({type: 'cancel'});
+        }
       }
-      case 'cancel': {
-        console.log(4);
-        console.log("failed auth")
-        return Promise.reject({type: 'cancel'});
-      }
+    } catch ({ message }) {
+      alert(`Facebook Login Error: ${message}`);
     }
+  }
+
+  signInFirebaseAccount(userInfo) {
+    var token = userInfo.id + "@gmail.com";
+    fbase.auth().createUserWithEmailAndPassword(token, userInfo.id)
+    .then(() =>  {
+        db.ref("/users").push({
+          name: userInfo.name,
+          fbID: userInfo.id
+        }).then(() => this.props.navigation.navigate('Home'));
+    }).catch(error => {
+      if (error.code === 'auth/email-already-in-use') {
+        // User account already exists, sign in
+        fbase.auth().signInWithEmailAndPassword(token, userInfo.id).catch(function(error) {
+          alert(error.code + ": " + error.message);
+        });
+        this.props.navigation.navigate('Home');
+      } else {
+        console.log(error.code);
+        alert(error.code + ": " + error.message);
+      }
+    });
   }
 
   render() {
@@ -84,21 +97,9 @@ export default class LoginScreen extends Component {
         <View style={styles.contentContainer}>
           <Text h1 style={styles.title}>Lunch Buddy</Text>
           <Text style={styles.subtitle}>Never eat lunch alone again!</Text>
-          <Input
-            style={styles.textInput}
-            placeholder='Username'
-            leftIcon={{ type: 'font-awesome', name: 'envelope', paddingRight: 10 }}
-          />
-
-          <Input
-            style={styles.textInput}
-            placeholder='Password'
-            leftIcon={{ type: 'font-awesome', name: 'lock', paddingLeft: 5, paddingRight: 15 }}
-          />
-          {/* <FBLoginButton /> */}
           
           <Button 
-            title="Log In"
+            title="Log In With Facebook"
             style={styles.loginButton}
             // onPress={() => this.props.navigation.navigate('Main')}
             onPress={() => this.signInWithFacebook()}
