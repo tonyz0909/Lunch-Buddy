@@ -23,10 +23,12 @@ export default class HomeScreen extends Component {
     this.state = {
       isDateTimePickerVisible: false,
       isDateTimePickerVisible2: false,
-      locationPlaceID: "[placeidhere]" //this is important place_id
+      locationPlaceID: "[placeidhere]", //string - place_id
+      lunchStartDateTime: new Date(), // datetime object - start 
+      lunchEndDateTime: new Date(), // datetime object - end 
     };
-    this.lunchstartstring = "start string" // start date time string 
-    this.lunchendstring = "end string" // end date time string 
+    this.lunchstartstring = "start string" // TEST start date time string 
+    this.lunchendstring = "end string" // TEST end date time string 
   }
 
   showDateTimePicker = () => {
@@ -37,6 +39,7 @@ export default class HomeScreen extends Component {
   };
   handleDatePicked = date => {
     this.lunchstartstring = date.toString();
+    this.state.lunchStartDateTime = date
     this.hideDateTimePicker();
   };
 
@@ -48,6 +51,7 @@ export default class HomeScreen extends Component {
   };
   handleDatePicked2 = date => {
     this.lunchendstring = date.toString();
+    this.state.lunchEndDateTime = date
     this.hideDateTimePicker2();
   };
 
@@ -58,11 +62,11 @@ export default class HomeScreen extends Component {
   submit = () => {
     let request = { 
       location: this.state.locationPlaceID,
-      startTime: this.lunchstartstring,
-      endTime: this.lunchendstring
+      startTime: this.state.lunchStartDateTime,
+      endTime: this.state.lunchEndDateTime,
     }
     console.log(request); 
-    Alert.alert("test");
+    Alert.alert("test"); //Just to not crash stuff 
   }
 
   render() {
