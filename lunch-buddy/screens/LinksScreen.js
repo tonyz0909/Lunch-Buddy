@@ -5,6 +5,21 @@ import { ExpoLinksView } from '@expo/samples';
 
 import { db } from '../src/config';
 
+function newUser(fName, lName, email, phoneNumber) {
+  db.ref('/users').push({
+    fName,
+    lName,
+    email,
+    phoneNumber
+  }).then((data) => {
+    //success callback
+    console.log('data' , data)
+  }).catch((error) => {
+    //error callback
+    console.log('error ', error)
+  })
+}
+
 let addItem = item => {
   db.ref('/items').push({
     name: item

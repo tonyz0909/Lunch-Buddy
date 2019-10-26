@@ -9,66 +9,83 @@ import {
   View,
   TextInput
 } from 'react-native';
-// import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button } from 'react-native-elements';
+import { firebaseapp as fbase} from '../src/config';
+import * as Facebook from 'expo-facebook';
+// import firebase from 'firebase';
 
 export default class LoginScreen extends Component {
+  async signInWithFacebook() {
+    const appId = "592476948187357";
+    const permissions = ['public_profile', 'email'];  // Permissions required, consult Facebook docs
+    
+    try {
+      const {type, token} = await Facebook.logInWithReadPermissionsAsync(
+        appId, {permissions});
+      switch (type) {
+        case 'success': {
+          const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`);
+          var userInfo = await response.json();
+          console.log(userInfo);
+          this.signInFirebaseAccount(userInfo);
 
-  state = {
-    email: '',
-    password: '',
-    errorMessage: '',
-  };
+          return Promise.resolve({type: 'success'});
+        }
+        case 'cancel': {
+          console.log("authentication cancelled")
+          return Promise.reject({type: 'cancel'});
+        }
+      }
+    } catch ({ message }) {
+      alert(`Facebook Login Error: ${message}`);
+    }
+  }
+
+  signInFirebaseAccount(userInfo) {
+    var token = userInfo.id + "@gmail.com";
+    fbase.auth().createUserWithEmailAndPassword(token, userInfo.id)
+    .then(() =>  {
+        fbase.firestore().collection("users").doc(fbase.auth().currentUser.uid).set({
+          name: userInfo.name,
+          fbID: userInfo.id,
+          email: token
+      }).then(() => this.props.navigation.navigate('Registration'));
+    }).catch(error => {
+      if (error.code === 'auth/email-already-in-use') {
+        // User account already exists, sign in
+        fbase.auth().signInWithEmailAndPassword(token, userInfo.id).catch(function(error) {
+          alert(error.code + ": " + error.message);
+        });
+        this.props.navigation.navigate('Main');
+      } else {
+        console.log(error.code);
+        alert(error.code + ": " + error.message);
+      }
+    });
+  }
 
   render() {
     return (
       <View style={styles.container}>
         <View style={styles.contentContainer}>
-          {/* <Text style={styles.errorText}>{this.state.errorMessage}</Text> */}
           <Text h1 style={styles.title}>Lunch Buddy</Text>
           <Text style={styles.subtitle}>Never eat lunch alone again!</Text>
-          <Input
-            style={styles.textInput}
-            placeholder='Username'
-            leftIcon={{ type: 'font-awesome', name: 'envelope', paddingRight: 10 }}
-          />
-
-          <Input
-            style={styles.textInput}
-            placeholder='Password'
-            leftIcon={{ type: 'font-awesome', name: 'lock', paddingLeft: 5, paddingRight: 15 }}
+          
+          <Button 
+            title="Log In With Facebook"
+            style={styles.loginButton}
+            onPress={() => this.signInWithFacebook()}
           />
 
           <Button 
-            title="Log In"
+            title="Direct Enter"
             style={styles.loginButton}
             onPress={() => this.props.navigation.navigate('Main')}
           />
-    
-          {/* <TouchableOpacity
-            style={styles.signUpButton}
-            onPress={() => this.props.navigation.navigate('Home')}>
-            <Text style={styles.loginText}>Login</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-                style={styles.clearButton}
-                onPress={() => this.props.navigation.navigate('SignUp')}>
-                <Text style={styles.loginText}>Don't have an account?</Text>
-          </TouchableOpacity> */}
         </View>
       </View>
     );
   }
-}
-
-LoginScreen.navigationOptions = {
-  header: null,
-};
-
-function handleLearnMorePress() {
-  WebBrowser.openBrowserAsync(
-    'https://docs.expo.io/versions/latest/workflow/development-mode/'
-  );
 }
 
 const styles = StyleSheet.create({
@@ -77,14 +94,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 30,
     justifyContent: 'center',
-    // alignItems: 'center',
   },
   loginButton: {
     padding: 10,
     paddingTop: 20
   },
   textInput: {
-    // padding: 0,
     margin: 0
   },
   title: {
