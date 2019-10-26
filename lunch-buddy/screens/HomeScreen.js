@@ -208,10 +208,15 @@ export default class HomeScreen extends Component {
           {/* <Text style={styles.getStartedText}>
             This is a string: {this.state.locationPlaceID}
           </Text> */}
-
-
-          <View style={styles.fixToText}>
-            <Button title="Submit Request!" buttonStyle={styles.button} raised={true} onPress={this.submit} />
+          <View>
+          <ListItem
+            key={0}
+            title={
+              <View style={styles.fixToText}>
+                <Button title="Submit Request!" buttonStyle={styles.button} raised={true} onPress={this.submit} />
+              </View>
+            }
+          />
           </View>
         </ScrollView>
       </View>
