@@ -5,75 +5,137 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 
+
+import {Button, Input, Icon, Text, ListItem} from 'react-native-elements';
 import { MonoText } from '../components/StyledText';
+import DateTimePicker from "react-native-modal-datetime-picker";
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import API from '../api.json';
 
 export default class HomeScreen extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isDateTimePickerVisible: false,
+      isDateTimePickerVisible2: false,
+      locationPlaceID: "[placeidhere]"
+    };
+    this.lunchstartstring = "start string"
+    this.lunchendstring = "end string"
+  }
+
+  showDateTimePicker = () => {
+    this.setState({ isDateTimePickerVisible: true });
+  };
+  hideDateTimePicker = () => {
+    this.setState({ isDateTimePickerVisible: false });
+  };
+  handleDatePicked = date => {
+    this.lunchstartstring = date.toString();
+    this.hideDateTimePicker();
+  };
+
+  showDateTimePicker2 = () => {
+    this.setState({ isDateTimePickerVisible2: true });
+  };
+  hideDateTimePicker2 = () => {
+    this.setState({ isDateTimePickerVisible2: false });
+  };
+  handleDatePicked2 = date => {
+    this.lunchendstring = date.toString();
+    this.hideDateTimePicker2();
+  };
+
+  handleLocationPicked = str => {
+    this.setState({locationPlaceID: str});
+  }
+
   render() {
     return (
       <View style={styles.container}>
         <ScrollView
           style={styles.container}
           contentContainerStyle={styles.contentContainer}>
-  
-          <TouchableOpacity
-            // style={styles.button}
-            onPress={() => {
-              this.props.navigation.navigate('Login')
-            }}>
-            <Text>Go To Login</Text>
-          </TouchableOpacity>
-  
-          <View style={styles.welcomeContainer}>
-            <Image
-              source={
-                __DEV__
-                  ? require('../assets/images/robot-dev.png')
-                  : require('../assets/images/robot-prod.png')
-              }
-              style={styles.welcomeImage}
+          <View style={styles.inputs}>
+            <ListItem
+              key={0}
+              title={<Text style={styles.boldText}>{"Lunch Times:"}</Text>}
+              subtitle={
+                <View style={styles.fixToText}>
+                  <GooglePlacesAutocomplete
+                    placeholder='Enter Location'
+                    minLength={2}
+                    autoFocus={false}
+                    returnKeyType={'search'}
+                    listViewDisplayed='true'
+                    fetchDetails={true}
+                    renderDescription={row => row.description}
+                    onPress={
+                      (data, details = null) => { // 'details' is provided when fetchDetails = true
+                        console.log(data.place_id)
+                        this.handleLocationPicked(data.place_id)
+                      }}
+                    getDefaultValue={() => ''}
+                    query={{
+                      // available options: https://developers.google.com/places/web-service/autocomplete
+                      key: API["googlemaps"],
+                      language: 'en', // language of the results
+                    }}
+                    nearbyPlacesAPI='GooglePlacesSearch'
+                    GooglePlacesSearchQuery={{
+                      // available options for GooglePlacesSearch API : https://developers.google.com/places/web-service/search
+                      rankby: 'distance',
+                    }}
+                  />
+                </View>}
+              bottomDivider
             />
           </View>
-          <View style={styles.getStartedContainer}>
-            <DevelopmentModeNotice />
-  
-            <Text style={styles.getStartedText}>Get started by opening</Text>
-  
-            <View
-              style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>
-              <MonoText>screens/HomeScreen.js</MonoText>
-            </View>
-  
-            <Text style={styles.getStartedText}>
-              Change this text and your app will automatically reload.
-            </Text>
+
+
+          <View style={styles.inputs}>
+            <ListItem
+              key={0}
+              title={<Text style={styles.boldText}>{"Lunch Times:"}</Text>}
+              subtitle={
+                <View style={styles.fixToText}>
+                <Button title="Start" onPress={this.showDateTimePicker} buttonStyle={styles.button} />
+                <DateTimePicker
+                  isVisible={this.state.isDateTimePickerVisible}
+                  onConfirm={this.handleDatePicked}
+                  onCancel={this.hideDateTimePicker}
+                  datePickerModeAndroid="calendar"
+                  mode="datetime"
+                />
+
+                <Button title="End" onPress={this.showDateTimePicker2} buttonStyle={styles.button} />
+                <DateTimePicker
+                  isVisible={this.state.isDateTimePickerVisible2}
+                  onConfirm={this.handleDatePicked2}
+                  onCancel={this.hideDateTimePicker2}
+                  datePickerModeAndroid="calendar"
+                  mode="datetime"
+                />
+                </View>}
+              bottomDivider
+            />
           </View>
-  
-          <View style={styles.helpContainer}>
-            <TouchableOpacity onPress={handleHelpPress} style={styles.helpLink}>
-              <Text style={styles.helpLinkText}>
-                Help, it didn’t automatically reload!
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-  
-        <View style={styles.tabBarInfoContainer}>
-          <Text style={styles.tabBarInfoText}>
-            This is a tab bar. You can edit it in:
+
+          <Text style={styles.getStartedText}>
+            {this.lunchstartstring}
           </Text>
-  
-          <View
-            style={[styles.codeHighlightContainer, styles.navigationFilename]}>
-            <MonoText style={styles.codeHighlightText}>
-              navigation/MainTabNavigator.js
-            </MonoText>
+
+          <View>
+
           </View>
-        </View>
+          <Text style={styles.getStartedText}>
+            This is a string: {this.state.locationPlaceID}
+          </Text>
+        </ScrollView>
       </View>
     );
   }
@@ -106,6 +168,10 @@ function DevelopmentModeNotice() {
   }
 }
 
+HomeScreen.navigationOptions = {
+  title: "Create Request",
+};
+
 function handleLearnMorePress() {
   WebBrowser.openBrowserAsync(
     'https://docs.expo.io/versions/latest/workflow/development-mode/'
@@ -119,6 +185,27 @@ function handleHelpPress() {
 }
 
 const styles = StyleSheet.create({
+
+  inputs: {
+    flex: 1,
+  },
+  boldText: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  ratingText: {
+    fontSize: 20,
+    color: 'grey',
+  },
+  fixToText: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    margin: 10
+  },
+  button: {
+    width: 160
+  },
+
   container: {
     flex: 1,
     backgroundColor: '#fff',
