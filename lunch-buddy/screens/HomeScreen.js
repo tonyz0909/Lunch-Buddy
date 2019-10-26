@@ -1,6 +1,7 @@
 import * as WebBrowser from 'expo-web-browser';
 import React, { Component } from 'react';
 import {
+  Alert,
   Image,
   Platform,
   ScrollView,
@@ -10,7 +11,7 @@ import {
 } from 'react-native';
 
 
-import {Button, Input, Icon, Text, ListItem} from 'react-native-elements';
+import { Button, Input, Icon, Text, ListItem } from 'react-native-elements';
 import { MonoText } from '../components/StyledText';
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
@@ -51,7 +52,16 @@ export default class HomeScreen extends Component {
   };
 
   handleLocationPicked = str => {
-    this.setState({locationPlaceID: str});
+    this.setState({ locationPlaceID: str });
+  }
+
+  submit = () => {
+    let request = { 
+      location: this.state.locationPlaceID,
+      startTime: this.lunchstartstring,
+      endTime: this.lunchendstring
+    }
+    Alert.alert(request);
   }
 
   render() {
@@ -103,23 +113,23 @@ export default class HomeScreen extends Component {
               title={<Text style={styles.boldText}>{"Enter Times:"}</Text>}
               subtitle={
                 <View style={styles.fixToText}>
-                <Button title="Start" onPress={this.showDateTimePicker} buttonStyle={styles.button} />
-                <DateTimePicker
-                  isVisible={this.state.isDateTimePickerVisible}
-                  onConfirm={this.handleDatePicked}
-                  onCancel={this.hideDateTimePicker}
-                  datePickerModeAndroid="calendar"
-                  mode="datetime"
-                />
+                  <Button title="Start" onPress={this.showDateTimePicker} buttonStyle={styles.button} />
+                  <DateTimePicker
+                    isVisible={this.state.isDateTimePickerVisible}
+                    onConfirm={this.handleDatePicked}
+                    onCancel={this.hideDateTimePicker}
+                    datePickerModeAndroid="calendar"
+                    mode="datetime"
+                  />
 
-                <Button title="End" onPress={this.showDateTimePicker2} buttonStyle={styles.button} />
-                <DateTimePicker
-                  isVisible={this.state.isDateTimePickerVisible2}
-                  onConfirm={this.handleDatePicked2}
-                  onCancel={this.hideDateTimePicker2}
-                  datePickerModeAndroid="calendar"
-                  mode="datetime"
-                />
+                  <Button title="End" onPress={this.showDateTimePicker2} buttonStyle={styles.button} />
+                  <DateTimePicker
+                    isVisible={this.state.isDateTimePickerVisible2}
+                    onConfirm={this.handleDatePicked2}
+                    onCancel={this.hideDateTimePicker2}
+                    datePickerModeAndroid="calendar"
+                    mode="datetime"
+                  />
                 </View>}
               bottomDivider
             />
@@ -135,6 +145,9 @@ export default class HomeScreen extends Component {
           <Text style={styles.getStartedText}>
             This is a string: {this.state.locationPlaceID}
           </Text>
+          <View style={styles.fixToText}>
+            <Button title="Submit Request!" buttonStyle={styles.button} raised={true} onPress={this.submit} />
+          </View>
         </ScrollView>
       </View>
     );
@@ -205,7 +218,6 @@ const styles = StyleSheet.create({
   button: {
     width: 160
   },
-
   container: {
     flex: 1,
     backgroundColor: '#fff',
