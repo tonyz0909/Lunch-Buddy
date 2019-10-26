@@ -139,11 +139,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffb380',
   },
   baseText: {
-    fontSize: 20,
+    fontSize: 18,
   },
   boldText: {
-    fontSize: 20,
-    fontWeight: "bold"
+    fontSize: 18,
+    fontWeight: "600"
   },
   button: {
     backgroundColor:"#037d50",
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     margin: 10
   },
   ratingText: {
-    fontSize: 20,
+    fontSize: 18,
     color: 'grey'
   }
 });
