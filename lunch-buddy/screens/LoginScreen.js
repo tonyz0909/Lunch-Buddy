@@ -42,7 +42,7 @@ export default class LoginScreen extends Component {
           <Button 
             title="Log In"
             style={styles.loginButton}
-            onPress={() => this.props.navigation.navigate('Home')}
+            onPress={() => this.props.navigation.navigate('Main')}
           />
     
           {/* <TouchableOpacity
