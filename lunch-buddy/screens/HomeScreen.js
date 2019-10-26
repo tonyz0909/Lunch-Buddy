@@ -63,11 +63,11 @@ export default class HomeScreen extends Component {
           <View style={styles.inputs}>
             <ListItem
               key={0}
-              title={<Text style={styles.boldText}>{"Lunch Times:"}</Text>}
+              title={<Text style={styles.boldText}>{"Enter Location:"}</Text>}
               subtitle={
                 <View style={styles.fixToText}>
                   <GooglePlacesAutocomplete
-                    placeholder='Enter Location'
+                    placeholder='Location Search'
                     minLength={2}
                     autoFocus={false}
                     returnKeyType={'search'}
@@ -100,7 +100,7 @@ export default class HomeScreen extends Component {
           <View style={styles.inputs}>
             <ListItem
               key={0}
-              title={<Text style={styles.boldText}>{"Lunch Times:"}</Text>}
+              title={<Text style={styles.boldText}>{"Enter Times:"}</Text>}
               subtitle={
                 <View style={styles.fixToText}>
                 <Button title="Start" onPress={this.showDateTimePicker} buttonStyle={styles.button} />
