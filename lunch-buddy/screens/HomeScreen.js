@@ -10,11 +10,11 @@ import {
 } from 'react-native';
 
 
-import {Button, Input, Icon, Text, ListItem} from 'react-native-elements'; 
+import {Button, Input, Icon, Text, ListItem} from 'react-native-elements';
 import { MonoText } from '../components/StyledText';
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import API from '../api.json';  
+import API from '../api.json';
 
 export default class HomeScreen extends Component {
   constructor(props) {
@@ -35,7 +35,7 @@ export default class HomeScreen extends Component {
     this.setState({ isDateTimePickerVisible: false });
   };
   handleDatePicked = date => {
-    this.lunchstartstring = date.toString(); 
+    this.lunchstartstring = date.toString();
     this.hideDateTimePicker();
   };
 
@@ -54,16 +54,13 @@ export default class HomeScreen extends Component {
     this.setState({locationPlaceID: str});
   }
 
-  
+
   render() {
-    console.log(API);
-    console.log(API["googlemaps"]);
     return (
       <View style={styles.container}>
         <ScrollView
           style={styles.container}
           contentContainerStyle={styles.contentContainer}>
-
           <View style={styles.inputs}>
             <ListItem
               key={0}
@@ -86,10 +83,9 @@ export default class HomeScreen extends Component {
                     getDefaultValue={() => ''}
                     query={{
                       // available options: https://developers.google.com/places/web-service/autocomplete
-                      key: 'AIzaSyCwt1IlfjmH9cOk3FOLkMr4sORPsL5PT68',
+                      key: API["googlemaps"],
                       language: 'en', // language of the results
                     }}
-                    currentLocation={true} // Will add a 'Current location' button at the top of the predefined places list
                     nearbyPlacesAPI='GooglePlacesSearch'
                     GooglePlacesSearchQuery={{
                       // available options for GooglePlacesSearch API : https://developers.google.com/places/web-service/search
@@ -98,11 +94,11 @@ export default class HomeScreen extends Component {
                   />
                 </View>}
               bottomDivider
-            />   
-          </View> 
-          
+            />
+          </View>
 
-          <View style={styles.inputs}> 
+
+          <View style={styles.inputs}>
             <ListItem
               key={0}
               title={<Text style={styles.boldText}>{"Lunch Times:"}</Text>}
@@ -128,15 +124,15 @@ export default class HomeScreen extends Component {
                 </View>}
               bottomDivider
             />
-          </View> 
+          </View>
 
           <Text style={styles.getStartedText}>
             {this.lunchstartstring}
           </Text>
 
-          <View> 
-            
-          </View> 
+          <View>
+
+          </View>
           <Text style={styles.getStartedText}>
             This is a string: {this.state.locationPlaceID}
           </Text>
@@ -192,13 +188,13 @@ function handleHelpPress() {
 const styles = StyleSheet.create({
 
   inputs: {
-    flex: 1, 
+    flex: 1,
   },
   boldText: {
     fontSize: 20,
     fontWeight: "bold",
   },
-  ratingText: { 
+  ratingText: {
     fontSize: 20,
     color: 'grey',
   },
