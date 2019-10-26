@@ -12,6 +12,8 @@ export default class LinksScreen extends Component {
       location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
       start: "11:30am",
       end: "1:30pm",
+      matched: false,
+      match: null,
       edits: {
         location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
         start: "11:30am",
@@ -62,6 +64,12 @@ export default class LinksScreen extends Component {
                     key={2}
                     title={<Text style={styles.boldText}>{"Lunch end time:"}</Text>}
                     subtitle={<Text style={styles.ratingText}>{this.state.end}</Text>}
+                    bottomDivider
+                  />
+                  <ListItem
+                    key={3}
+                    title={<Text style={styles.boldText}>{"Matched?"}</Text>}
+                    subtitle={<Text style={styles.ratingText}>{this.state.matched ? "Yes" : "No"}</Text>}
                     bottomDivider
                   />
                   <View style={styles.fixToText}>
