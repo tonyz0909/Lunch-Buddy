@@ -22,10 +22,10 @@ export default class HomeScreen extends Component {
     this.state = {
       isDateTimePickerVisible: false,
       isDateTimePickerVisible2: false,
-      locationPlaceID: "[placeidhere]"
+      locationPlaceID: "[placeidhere]" //this is important place_id
     };
-    this.lunchstartstring = "start string"
-    this.lunchendstring = "end string"
+    this.lunchstartstring = "start string" // start date time string 
+    this.lunchendstring = "end string" // end date time string 
   }
 
   showDateTimePicker = () => {
@@ -100,7 +100,7 @@ export default class HomeScreen extends Component {
           <View style={styles.inputs}>
             <ListItem
               key={0}
-              title={<Text style={styles.boldText}>{"Enter Times:"}</Text>}
+              title={<Text style={styles.boldText}>{"Start Time:"}</Text>}
               subtitle={
                 <View style={styles.fixToText}>
                 <Button title="Start" onPress={this.showDateTimePicker} buttonStyle={styles.button} />
@@ -111,7 +111,14 @@ export default class HomeScreen extends Component {
                   datePickerModeAndroid="calendar"
                   mode="datetime"
                 />
-
+                </View>}
+              bottomDivider
+            />
+            <ListItem 
+              key={1}
+              title={<Text style={styles.boldText}>{"End Times:"}</Text>}
+              subtitle={
+                <View style={styles.fixToText}>
                 <Button title="End" onPress={this.showDateTimePicker2} buttonStyle={styles.button} />
                 <DateTimePicker
                   isVisible={this.state.isDateTimePickerVisible2}
@@ -121,7 +128,7 @@ export default class HomeScreen extends Component {
                   mode="datetime"
                 />
                 </View>}
-              bottomDivider
+                bottomDivider
             />
           </View>
 
