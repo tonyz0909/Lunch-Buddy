@@ -39,7 +39,7 @@ export default class HomeScreen extends Component {
   };
   handleDatePicked = date => {
     this.lunchstartstring = date.toString();
-    this.state.lunchStartDateTime = date
+    this.setState({lunchStartDateTime:date}); 
     this.hideDateTimePicker();
   };
 
@@ -51,7 +51,7 @@ export default class HomeScreen extends Component {
   };
   handleDatePicked2 = date => {
     this.lunchendstring = date.toString();
-    this.state.lunchEndDateTime = date
+    this.setState({lunchEndDateTime: date});
     this.hideDateTimePicker2();
   };
 
