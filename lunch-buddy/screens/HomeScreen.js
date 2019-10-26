@@ -10,12 +10,31 @@ import {
   View,
 } from 'react-native';
 
-
 import { Button, Input, Icon, Text, ListItem } from 'react-native-elements';
 import { MonoText } from '../components/StyledText';
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import API from '../api.json';
+import { firebaseapp as fbase} from '../src/config';
+
+//real time database 
+// function newRequest(placeID, startTime, endTime) {
+//   matched = false;
+//   db.ref('/requests').push({
+//     //userID, 
+//     start,
+//     end,
+//     placeID,
+//     matched,
+//     //matchID
+//   }).then((data) => {
+//     //success callback
+//     console.log('data' , data)
+//   }).catch((error) => {
+//     //error callback
+//     console.log('error ', error)
+//   })
+// }
 
 export default class HomeScreen extends Component {
   constructor(props) {
@@ -23,12 +42,12 @@ export default class HomeScreen extends Component {
     this.state = {
       isDateTimePickerVisible: false,
       isDateTimePickerVisible2: false,
-      locationPlaceID: null, //string - place_id
-      lunchStartDateTime: null, // datetime object - start 
-      lunchEndDateTime: null, // datetime object - end 
+      locationPlaceID: "[placeidhere]", //string - place_id
+      lunchStartDateTime: new Date(), // datetime object - start 
+      lunchEndDateTime: new Date(), // datetime object - end 
     };
-    this.lunchstartstring = "" // TEST start date time string 
-    this.lunchendstring = "" // TEST end date time string 
+    this.lunchstartstring = "start string" // TEST start date time string 
+    this.lunchendstring = "end string" // TEST end date time string 
   }
 
   showDateTimePicker = () => {
@@ -38,7 +57,7 @@ export default class HomeScreen extends Component {
     this.setState({ isDateTimePickerVisible: false });
   };
   handleDatePicked = date => {
-    this.lunchstartstring = date.toLocaleTimeString('en-US');
+    this.lunchstartstring = date.toString();
     this.setState({lunchStartDateTime:date}); 
     this.hideDateTimePicker();
   };
@@ -50,7 +69,7 @@ export default class HomeScreen extends Component {
     this.setState({ isDateTimePickerVisible2: false });
   };
   handleDatePicked2 = date => {
-    this.lunchendstring = date.toLocaleTimeString('en-US');
+    this.lunchendstring = date.toString();
     this.setState({lunchEndDateTime: date});
     this.hideDateTimePicker2();
   };
@@ -59,22 +78,33 @@ export default class HomeScreen extends Component {
     this.setState({ locationPlaceID: str });
   }
 
+  handleSubmit= () => {
+    var user = fbase.auth().currentUser; 
+    console.log(user);
+    var db = fbase.firestore();
+    var profileRef = db.collection("requests").doc(user.uid);
+    profileRef.set({
+      userID: user.uid,
+      startTime: this.state.lunchStartDateTime,
+      endTime: this.state.lunchEndDateTime,
+      placeID: this.state.locationPlaceID,
+      matched: false,
+      matchID: ''
+    }, { merge: true});
+  }
+
   submit = () => {
-    if (this.state.locationPlaceID == null || this.state.lunchStartDateTime == null || this.state.lunchEndDateTime == null) {
-      Alert.alert("One or more fields are empty"); 
-    } else {
-      if (this.state.lunchStartDateTime > this.state.lunchEndDateTime) { 
-        Alert.alert("End Time is before Start Time!");
-      } else {
-        let request = { 
-          location: this.state.locationPlaceID,
-          startTime: this.state.lunchStartDateTime,
-          endTime: this.state.lunchEndDateTime,
-        }
-        console.log(request); 
-        Alert.alert("Request Going Through"); //Just to not crash stuff 
-      }
+    //debug purposes 
+    let request = { 
+      location: this.state.locationPlaceID,
+      startTime: this.state.lunchStartDateTime,
+      endTime: this.state.lunchEndDateTime,
     }
+    console.log(request); 
+    //firebase entry
+    this.handleSubmit();
+    Alert.alert("request saved");
+    //Alert.alert("test"); //Just to not crash stuff 
   }
 
   render() {
@@ -88,7 +118,7 @@ export default class HomeScreen extends Component {
               key={0}
               title={<Text style={styles.boldText}>{"Enter Location:"}</Text>}
               subtitle={
-                  //TODO fix the double click 
+                <View style={styles.fixToText}>
                   <GooglePlacesAutocomplete
                     placeholder='Location Search'
                     minLength={2}
@@ -114,7 +144,7 @@ export default class HomeScreen extends Component {
                       rankby: 'distance',
                     }}
                   />
-                  }
+                </View>}
               bottomDivider
             />
           </View>
@@ -123,55 +153,48 @@ export default class HomeScreen extends Component {
           <View style={styles.inputs}>
             <ListItem
               key={0}
-              title={
-                <View style= { styles.times }>
-                <Text style={styles.boldText}>{"Start Time:"}</Text>
-                <Text style={styles.timeText}> {this.lunchstartstring ? this.lunchstartstring : "12:00:00 PM"} </Text>
-                <View>
-                  <Icon name='edit' onPress={this.showDateTimePicker} />
-                  <DateTimePicker
-                    isVisible={this.state.isDateTimePickerVisible}
-                    onConfirm={this.handleDatePicked}
-                    onCancel={this.hideDateTimePicker}
-                    datePickerModeAndroid="calendar"
-                    mode="datetime"
-                  />
-                </View>
-                </View>
-              }
+              title={<Text style={styles.boldText}>{"Start Time:"}</Text>}
+              subtitle={
+                <View style={styles.fixToText}>
+                <Button title="Start" onPress={this.showDateTimePicker} buttonStyle={styles.button} />
+                <DateTimePicker
+                  isVisible={this.state.isDateTimePickerVisible}
+                  onConfirm={this.handleDatePicked}
+                  onCancel={this.hideDateTimePicker}
+                  datePickerModeAndroid="calendar"
+                  mode="datetime"
+                />
+                </View>}
               bottomDivider
             />
             <ListItem 
               key={1}
-              title={
-                <View style={styles.times}>
-                <Text style={styles.boldText}>{"End Time:"}</Text>
-                  <Text style={styles.timeText}>{this.lunchendstring ? this.lunchendstring : "2:00:00 PM"} </Text>
-                <View>
-                  <Icon name='edit' onPress={this.showDateTimePicker2} />
-                  <DateTimePicker
-                    isVisible={this.state.isDateTimePickerVisible2}
-                    onConfirm={this.handleDatePicked2}
-                    onCancel={this.hideDateTimePicker2}
-                    datePickerModeAndroid="calendar"
-                    mode="datetime"
-                  />
-                </View>
-                </View>
-              }
-              bottomDivider
+              title={<Text style={styles.boldText}>{"End Times:"}</Text>}
+              subtitle={
+                <View style={styles.fixToText}>
+                <Button title="End" onPress={this.showDateTimePicker2} buttonStyle={styles.button} />
+                <DateTimePicker
+                  isVisible={this.state.isDateTimePickerVisible2}
+                  onConfirm={this.handleDatePicked2}
+                  onCancel={this.hideDateTimePicker2}
+                  datePickerModeAndroid="calendar"
+                  mode="datetime"
+                />
+                </View>}
+                bottomDivider
             />
           </View>
-          
-          {/* Test stuff */}
-          {/* <Text style={styles.getStartedText}>
+
+          <Text style={styles.getStartedText}>
             {this.lunchstartstring}
-          </Text> */}
-          {/* <Text style={styles.getStartedText}>
+          </Text>
+
+          <View>
+
+          </View>
+          <Text style={styles.getStartedText}>
             This is a string: {this.state.locationPlaceID}
-          </Text> */}
-
-
+          </Text>
           <View style={styles.fixToText}>
             <Button title="Submit Request!" buttonStyle={styles.button} raised={true} onPress={this.submit} />
           </View>
@@ -225,9 +248,7 @@ function handleHelpPress() {
 }
 
 const styles = StyleSheet.create({
-  timeText: {
-    fontSize: 16,
-  },
+
   inputs: {
     flex: 1,
   },
@@ -240,11 +261,6 @@ const styles = StyleSheet.create({
     color: 'grey',
   },
   fixToText: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    margin: 10
-  },
-  times: { 
     flexDirection: 'row',
     justifyContent: 'space-around',
     margin: 10
