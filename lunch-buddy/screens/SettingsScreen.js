@@ -6,41 +6,49 @@ import profileImg from '../assets/images/profile_avatar.png';
 import PropTypes from 'prop-types';
 import RequestComponent from '../components/RequestComponent';
 
-import { db } from '../src/config';
-
-let itemsRef = db.ref('/items');
+import { firebaseapp as fbase} from '../src/config';
+import firebase from 'firebase';
 
 export default class SettingsScreen extends Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
-      name: 'Tony',
-      slug: 'toeknee_z',
-      description: "I'm lonely pls be my lunch buddy",
-      email: 'tonyz0909@gmail.com',
-      password: '*****'
+      name: '',
+      slug: '',
+      description: "",
+      email: '',
+      phone: ''
     };
+    this.populateValues = this.populateValues.bind(this)
   }
 
-  componentDidMount() {
-    itemsRef.on('value', snapshot => {
-      let data = snapshot.val();
-      let items = Object.values(data);
-      this.setState({ items });
+  populateValues() {
+    userID = fbase.auth().currentUser.uid;
+    var userRef = fbase.firestore().collection("users").doc(userID);
+
+    userRef.get().then((doc) => {
+      if (doc.exists) {
+        var data = doc.data();
+        this.setState({
+          name: data.name,
+          slug: data.username,
+          description: data.tagline,
+          email: data.email,
+          phone: data.phoneNumber
+        });
+        
+      } else {
+          console.log("No such document!");
+      }
+    }).catch(function(error) {
+      console.log("Error getting document:", error);
     });
   }
 
-  old = () => {
-    return (
-      <View style={styles.sectionHeaderContainer}>
-        <Image source={profileImg} style={styles.image} PlaceholderContent={<ActivityIndicator />} />
-        <Text style={styles.sectionHeaderText}>{this.state.name}</Text>
-      </View>
-    );
-  }
-
   render() {
+    this.populateValues();
     return (
       <ScrollView style={styles.container}>
         <View style={styles.titleContainer}>
@@ -64,14 +72,6 @@ export default class SettingsScreen extends Component {
         <View style={styles.body}>
           <View style={styles.fixToText}>
             <Text style={styles.title}>
-              Name:
-            </Text>
-            <Text>
-              {this.state.name}
-            </Text>
-          </View>
-          <View style={styles.fixToText}>
-            <Text style={styles.title}>
               Email:
             </Text>
             <Text>
@@ -80,18 +80,10 @@ export default class SettingsScreen extends Component {
           </View>
           <View style={styles.fixToText}>
             <Text style={styles.title}>
-              Username:
+              Phone:
             </Text>
             <Text>
-              {this.state.slug}
-            </Text>
-          </View>
-          <View style={styles.fixToText}>
-            <Text style={styles.title}>
-              Password:
-            </Text>
-            <Text>
-              {this.state.password}
+              {this.state.phone}
             </Text>
           </View>
           <View style={styles.fixToText}>

@@ -33,7 +33,9 @@ function newUser(name, email, phoneNumber) {
 export default class LoginScreen extends Component {
   state = {
     email: '',
+    username: '',
     phoneNumber: '',
+    tagline: '',
     errorMessage: '',
   };
 
@@ -47,7 +49,9 @@ export default class LoginScreen extends Component {
     var profileRef = db.collection("users").doc(user.uid);
         var setWithMerge = profileRef.set({
             phoneNumber: this.state.phoneNumber,
-            email: this.state.email
+            email: this.state.email,
+            tagline: this.state.tagline,
+            username: this.state.username
         }, { merge: true });
     this.props.navigation.navigate('Main')
   }
@@ -63,6 +67,14 @@ export default class LoginScreen extends Component {
           email registered to your Facebook account.</Text>
           <Input
             style={styles.textInput}
+            placeholder='Username'
+            leftIcon={{ type: 'font-awesome', name: 'envelope', paddingRight: 10 }}
+            onChangeText={username => this.setState({ username })}
+            value={this.state.username}
+          />
+          
+          <Input
+            style={styles.textInput}
             placeholder='Updated Email (optional)'
             leftIcon={{ type: 'font-awesome', name: 'envelope', paddingRight: 10 }}
             onChangeText={email => this.setState({ email })}
@@ -75,6 +87,14 @@ export default class LoginScreen extends Component {
             leftIcon={{ type: 'font-awesome', name: 'envelope', paddingRight: 10 }}
             onChangeText={phoneNumber => this.setState({ phoneNumber })}
             value={this.state.phoneNumber}
+          />
+
+          <Input
+            style={styles.textInput}
+            placeholder='Tagline: Send a short message to your potential matches!'
+            leftIcon={{ type: 'font-awesome', name: 'envelope', paddingRight: 10 }}
+            onChangeText={tagline => this.setState({ tagline })}
+            value={this.state.tagline}
           />
 
           <Button 

@@ -27,9 +27,10 @@
       "supportsTablet": true
     },
     "extra": {
-      "facebook" : {
-        "appID" : "592476948187357"
+      "facebook": {
+        "appID": "592476948187357"
       }
-    }
+    },
+    "description": ""
   }
 }
