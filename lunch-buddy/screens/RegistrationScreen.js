@@ -13,12 +13,12 @@ import {
 } from 'react-native';
 // import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button } from 'react-native-elements';
-import { db } from '../src/config';
+import { firebaseapp as fbase} from '../src/config';
+// import * as firebase from 'firebase';
 
-function newUser(fName, lName, email, phoneNumber) {
-  db.ref('/users').push({
-    fName,
-    lName,
+function newUser(name, email, phoneNumber) {
+  fbase.firestore().ref('/users').push({
+    name,
     email,
     phoneNumber
   }).then((data) => {
@@ -31,10 +31,7 @@ function newUser(fName, lName, email, phoneNumber) {
 }
 
 export default class LoginScreen extends Component {
-
   state = {
-    firstName: '',
-    lastName: '',
     email: '',
     phoneNumber: '',
     errorMessage: '',
@@ -43,10 +40,16 @@ export default class LoginScreen extends Component {
   handleChange(field, e) {
     console.log(this.state);
   }
+
   handleSubmit = () => {
-    console.log(this.state.firstName);
-    newUser(this.state.firstName, this.state.lastName, this.state.email, this.state.phoneNumber);
-    AlertIOS.alert('User saved successfully');
+    var user = fbase.auth().currentUser;
+    var db = fbase.firestore();
+    var profileRef = db.collection("users").doc(user.uid);
+        var setWithMerge = profileRef.set({
+            phoneNumber: this.state.phoneNumber,
+            email: this.state.email
+        }, { merge: true });
+    this.props.navigation.navigate('Main')
   }
 
   render() {
@@ -54,24 +57,13 @@ export default class LoginScreen extends Component {
       <View style={styles.container}>
         <View style={styles.contentContainer}>
           {/* <Text style={styles.errorText}>{this.state.errorMessage}</Text> */}
-          <Text h1 style={styles.title}>Become a Lunch Buddy!</Text>
+          <Text h1 style={styles.title}>Contact Info</Text>
+          <Text style={styles.textMedium}>To connect you to your buddies! </Text>
+          <Text style={styles.textSmall}>If no additional email is supplied, we'll just use the 
+          email registered to your Facebook account.</Text>
           <Input
             style={styles.textInput}
-            placeholder='FirstName'
-            leftIcon={{ type: 'font-awesome', name: 'envelope', paddingRight: 10 }}
-            onChangeText={firstName => this.setState({ firstName })}
-            value={this.state.firstName}
-          />
-          <Input
-            style={styles.textInput}
-            placeholder='LastName'
-            leftIcon={{ type: 'font-awesome', name: 'envelope', paddingRight: 10 }}
-            onChangeText={lastName => this.setState({ lastName })}
-            value={this.state.lastName}
-          />
-          <Input
-            style={styles.textInput}
-            placeholder='Email'
+            placeholder='Updated Email (optional)'
             leftIcon={{ type: 'font-awesome', name: 'envelope', paddingRight: 10 }}
             onChangeText={email => this.setState({ email })}
             value={this.state.email}
@@ -84,13 +76,12 @@ export default class LoginScreen extends Component {
             onChangeText={phoneNumber => this.setState({ phoneNumber })}
             value={this.state.phoneNumber}
           />
-          <TouchableHighlight
-            style={styles.button}
-            underlayColor="white"
-            onPress={this.handleSubmit}
-          >
-            <Text style={styles.buttonText}>Add</Text>
-          </TouchableHighlight>
+
+          <Button 
+            title="Done"
+            style={styles.finishButton}
+            onPress={() => this.handleSubmit()}
+          />
         </View>
       </View>
     );
@@ -127,11 +118,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold"
   },
-  subtitle: {
+  textMedium: {
+    textAlign: "center",
+    fontSize: 30,
+    marginBottom: 10, 
+  },
+  textSmall: {
     textAlign: "center",
     fontSize: 20,
-    marginBottom: 30,
-    
+    marginBottom: 20, 
   },
   button: {
     height: 45,
@@ -144,5 +139,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignSelf: 'stretch',
     justifyContent: 'center'
+  },
+  finishButton: {
+    padding: 10,
+    paddingTop: 20
   }
 });

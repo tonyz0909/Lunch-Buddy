@@ -9,40 +9,12 @@ import {
   View,
   TextInput
 } from 'react-native';
-// import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button } from 'react-native-elements';
-import { firebaseapp as fbase, db } from '../src/config';
-// import { Facebook } from 'expo';
+import { firebaseapp as fbase} from '../src/config';
 import * as Facebook from 'expo-facebook';
-// import { AccessToken, LoginButton } from 'react-native-fbsdk';
+// import firebase from 'firebase';
 
 export default class LoginScreen extends Component {
-  // async signInWithFacebook() {
-  //   var provider = new fbase.auth.FacebookAuthProvider();
-  //   fbase.auth().signInWithRedirect(provider);
-
-  //   fbase.auth().getRedirectResult().then(function(result) {
-  //     if (result.credential) {
-  //       // This gives you a Facebook Access Token. You can use it to access the Facebook API.
-  //       var token = result.credential.accessToken;
-  //       // ...
-  //     }
-  //     // The signed-in user info.
-  //     var user = result.user;
-
-  //     console.log(result);
-  //   }).catch(function(error) {
-  //     // Handle Errors here.
-  //     var errorCode = error.code;
-  //     var errorMessage = error.message;
-  //     // The email of the user's account used.
-  //     var email = error.email;
-  //     // The firebase.auth.AuthCredential type that was used.
-  //     var credential = error.credential;
-  //     // ...
-  //   });
-  // }
-
   async signInWithFacebook() {
     const appId = "592476948187357";
     const permissions = ['public_profile', 'email'];  // Permissions required, consult Facebook docs
@@ -73,17 +45,18 @@ export default class LoginScreen extends Component {
     var token = userInfo.id + "@gmail.com";
     fbase.auth().createUserWithEmailAndPassword(token, userInfo.id)
     .then(() =>  {
-        db.ref("/users").push({
+        fbase.firestore().collection("users").doc(fbase.auth().currentUser.uid).set({
           name: userInfo.name,
-          fbID: userInfo.id
-        }).then(() => this.props.navigation.navigate('Home'));
+          fbID: userInfo.id,
+          email: token
+      }).then(() => this.props.navigation.navigate('Registration'));
     }).catch(error => {
       if (error.code === 'auth/email-already-in-use') {
         // User account already exists, sign in
         fbase.auth().signInWithEmailAndPassword(token, userInfo.id).catch(function(error) {
           alert(error.code + ": " + error.message);
         });
-        this.props.navigation.navigate('Home');
+        this.props.navigation.navigate('Main');
       } else {
         console.log(error.code);
         alert(error.code + ": " + error.message);
@@ -101,7 +74,6 @@ export default class LoginScreen extends Component {
           <Button 
             title="Log In With Facebook"
             style={styles.loginButton}
-            // onPress={() => this.props.navigation.navigate('Main')}
             onPress={() => this.signInWithFacebook()}
           />
 
@@ -109,7 +81,6 @@ export default class LoginScreen extends Component {
             title="Direct Enter"
             style={styles.loginButton}
             onPress={() => this.props.navigation.navigate('Main')}
-            //onPress={() => this.signInWithFacebook()}
           />
         </View>
       </View>
@@ -123,14 +94,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 30,
     justifyContent: 'center',
-    // alignItems: 'center',
   },
   loginButton: {
     padding: 10,
     paddingTop: 20
   },
   textInput: {
-    // padding: 0,
     margin: 0
   },
   title: {
