@@ -105,7 +105,7 @@ SettingsScreen.navigationOptions = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e1f7d5',
+    backgroundColor: '#ffffff',
   },
   body: {
     flex: 1,
@@ -116,7 +116,6 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
   button: {
-    backgroundColor: "#037d50",
     width: 160
   },
   fixToText: {
