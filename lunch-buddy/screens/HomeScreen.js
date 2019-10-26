@@ -10,7 +10,6 @@ import {
   View,
 } from 'react-native';
 
-
 import { Button, Input, Icon, Text, ListItem } from 'react-native-elements';
 import { MonoText } from '../components/StyledText';
 import DateTimePicker from "react-native-modal-datetime-picker";
@@ -18,14 +17,15 @@ import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplet
 import API from '../api.json';
 import { db } from '../src/config';
 
-function newRequest(fName, lName, email, phoneNumber) {
-  db.ref('/users').push({
-    userID, 
-    startTime,
-    endTime,
+function newRequest(placeID, startTime, endTime) {
+  matched = false;
+  db.ref('/requests').push({
+    //userID, 
+    start,
+    end,
     placeID,
     matched,
-    matchID
+    //matchID
   }).then((data) => {
     //success callback
     console.log('data' , data)
@@ -78,13 +78,17 @@ export default class HomeScreen extends Component {
   }
 
   submit = () => {
+    //debug purposes 
     let request = { 
       location: this.state.locationPlaceID,
       startTime: this.state.lunchStartDateTime,
       endTime: this.state.lunchEndDateTime,
     }
     console.log(request); 
-    Alert.alert("test"); //Just to not crash stuff 
+    //firebase entry
+    newRequest(this.state.locationPlaceID, this.state.lunchStartDateTime, this.state.lunchEndDateTime);
+    Alert.alert("request saved");
+    //Alert.alert("test"); //Just to not crash stuff 
   }
 
   render() {
