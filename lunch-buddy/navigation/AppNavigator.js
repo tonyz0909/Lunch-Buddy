@@ -17,5 +17,8 @@ export default createAppContainer(
     Home: HomeScreen,
     Links: LinksScreen,
     Settings: SettingsScreen,
+  },
+  {
+    initialRouteName: 'Login',
   })
 );

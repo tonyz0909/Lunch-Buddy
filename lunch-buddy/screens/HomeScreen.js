@@ -25,7 +25,7 @@ export default class HomeScreen extends Component {
             onPress={() => {
               this.props.navigation.navigate('Login')
             }}>
-            <Text>Go To Login</Text>
+            <Text>Log Out</Text>
           </TouchableOpacity>
   
           <View style={styles.welcomeContainer}>
