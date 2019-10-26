@@ -15,25 +15,26 @@ import { MonoText } from '../components/StyledText';
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import API from '../api.json';
-import { db } from '../src/config';
+import { firebaseapp as fbase} from '../src/config';
 
-function newRequest(placeID, startTime, endTime) {
-  matched = false;
-  db.ref('/requests').push({
-    //userID, 
-    start,
-    end,
-    placeID,
-    matched,
-    //matchID
-  }).then((data) => {
-    //success callback
-    console.log('data' , data)
-  }).catch((error) => {
-    //error callback
-    console.log('error ', error)
-  })
-}
+//real time database 
+// function newRequest(placeID, startTime, endTime) {
+//   matched = false;
+//   db.ref('/requests').push({
+//     //userID, 
+//     start,
+//     end,
+//     placeID,
+//     matched,
+//     //matchID
+//   }).then((data) => {
+//     //success callback
+//     console.log('data' , data)
+//   }).catch((error) => {
+//     //error callback
+//     console.log('error ', error)
+//   })
+// }
 
 export default class HomeScreen extends Component {
   constructor(props) {
@@ -77,6 +78,21 @@ export default class HomeScreen extends Component {
     this.setState({ locationPlaceID: str });
   }
 
+  handleSubmit= () => {
+    var user = fbase.auth().currentUser; 
+    console.log(user);
+    var db = fbase.firestore();
+    var profileRef = db.collection("requests").doc(user.uid);
+    profileRef.set({
+      userID: user.uid,
+      startTime: this.state.lunchStartDateTime,
+      endTime: this.state.lunchEndDateTime,
+      placeID: this.state.locationPlaceID,
+      matched: false,
+      matchID: ''
+    }, { merge: true});
+  }
+
   submit = () => {
     //debug purposes 
     let request = { 
@@ -86,7 +102,7 @@ export default class HomeScreen extends Component {
     }
     console.log(request); 
     //firebase entry
-    newRequest(this.state.locationPlaceID, this.state.lunchStartDateTime, this.state.lunchEndDateTime);
+    this.handleSubmit();
     Alert.alert("request saved");
     //Alert.alert("test"); //Just to not crash stuff 
   }

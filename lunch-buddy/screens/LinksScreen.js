@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Input, ListItem, Text } from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
-
+import { firebaseapp as fbase} from '../src/config';
+import API from '../api.json';
 import { db } from '../src/config';
 
 function newUser(fName, lName, email, phoneNumber) {
@@ -27,14 +28,54 @@ let addItem = item => {
 }
 
 export default class LinksScreen extends Component {
+  getRequest = () => {
+    var user = fbase.auth().currentUser; 
+    var db = fbase.firestore();
+    var profileRef = db.collection("requests").doc(user.uid);
+    profileRef.get().then(doc => {
+      if (doc.exists) {
+        console.log("Document data:", doc.data());
+        this.setState({
+          location: doc.data().placeID.toString(),
+          start: doc.data().startTime.toString(),
+          end: doc.data().endTime.toString(),
+          matched: doc.data().matched,
+          match: doc.data().matchID,
+          edits: {
+            location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
+            start: "11:30am",
+            end: "1:30pm",
+          }
+        });
+    } else {
+        // doc.data() will be undefined in this case
+        console.log("No such document!");
+    }
+    }).catch(function(error) {
+        console.log("Error getting document:", error);
+    });
+  }
+    
   constructor(props) {
     super(props);
     this.state = {
-      titleText: "Your Requests",
-      view: "view",
-      location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
-      start: "11:30am",
-      end: "1:30pm",
+      // titleText: "Your Requests",
+      // view: "view",
+      // location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
+      // start: "11:30am",
+      // end: "1:30pm",
+      // matched: false,
+      // match: null,
+      // edits: {
+      //   location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
+      //   start: "11:30am",
+      //   end: "1:30pm",
+      // }
+      titleText: '',
+      view: 'view',
+      location: 'Testing testing',
+      start: '',
+      end: '',
       matched: false,
       match: null,
       edits: {
@@ -43,6 +84,8 @@ export default class LinksScreen extends Component {
         end: "1:30pm",
       }
     };
+    this.getRequest = this.getRequest.bind(this);
+    this.getRequest();
   }
 
   flake = () => {
