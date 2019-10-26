@@ -78,7 +78,7 @@ export default class LinksScreen extends Component {
                     subtitle={<Input
                       placeholder={this.state.location}
                       onChangeText={text => this.setState({ edits: { ...this.state.edits, location: text } })} />}
-                    bottomDivider
+                      bottomDivider
                   />
                   <ListItem
                     key={1}
@@ -86,7 +86,7 @@ export default class LinksScreen extends Component {
                     subtitle={<Input
                       placeholder={this.state.start}
                       onChangeText={text => this.setState({ edits: { ...this.state.edits, start: text } })} />}
-                    bottomDivider
+                      bottomDivider
                   />
                   <ListItem
                     key={2}
@@ -94,7 +94,7 @@ export default class LinksScreen extends Component {
                     subtitle={<Input
                       placeholder={this.state.end}
                       onChangeText={text => this.setState({ edits: { ...this.state.edits, end: text } })} />}
-                    bottomDivider
+                      bottomDivider
                   />
                   <View style={styles.fixToText}>
                     <Button title="Cancel" buttonStyle={styles.button} raised={true} onPress={() => this.setState({ view: "view" })} />
@@ -124,8 +124,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 15,
-    backgroundColor: '#fff',
+    backgroundColor: '#e1f7d5',
     padding: 10
+  },
+  color: {
+    backgroundColor: '#ffb380',
   },
   baseText: {
     fontSize: 20,
@@ -135,6 +138,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold"
   },
   button: {
+    backgroundColor:"#037d50",
     width: 160
   },
   fixToText: {
