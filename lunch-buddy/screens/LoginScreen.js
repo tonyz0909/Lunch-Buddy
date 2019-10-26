@@ -11,11 +11,11 @@ import {
 } from 'react-native';
 // import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button } from 'react-native-elements';
-import { db as firebase } from '../src/config';
-import Expo from 'expo';
+import { firebaseapp as firebase } from '../src/config';
+// import { Facebook } from 'expo';
+import * as Facebook from 'expo-facebook';
 import * as Constants from 'expo-constants';
 // import { AccessToken, LoginButton } from 'react-native-fbsdk';
-// var FBLoginButton = require('./FBLoginButton');
 import FBLoginButton from './FBLoginButton';
 
 export default class LoginScreen extends Component {
@@ -46,11 +46,42 @@ export default class LoginScreen extends Component {
     await firebase.auth().signInWithCredential(credential);
   }
 
+  async signInWithFacebook() {
+    const appId = "592476948187357";
+    const permissions = ['public_profile', 'email'];  // Permissions required, consult Facebook docs
+    console.log(1);
+    const {
+      type,
+      token,
+    } = await Facebook.logInWithReadPermissionsAsync(
+      appId,
+      {permissions}
+    );
+    console.log(2);
+    switch (type) {
+      case 'success': {
+        console.log(3);
+        await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);  // Set persistent auth state
+        const credential = firebase.auth.FacebookAuthProvider.credential(token);
+        const facebookProfileData = await firebase.auth().signInAndRetrieveDataWithCredential(credential);  // Sign in with Facebook credential
+  
+        // Do something with Facebook profile data
+        // OR you have subscribed to auth state change, authStateChange handler will process the profile data
+        console.log("successful auth")
+        return Promise.resolve({type: 'success'});
+      }
+      case 'cancel': {
+        console.log(4);
+        console.log("failed auth")
+        return Promise.reject({type: 'cancel'});
+      }
+    }
+  }
+
   render() {
     return (
       <View style={styles.container}>
         <View style={styles.contentContainer}>
-          {/* <Text style={styles.errorText}>{this.state.errorMessage}</Text> */}
           <Text h1 style={styles.title}>Lunch Buddy</Text>
           <Text style={styles.subtitle}>Never eat lunch alone again!</Text>
           <Input
@@ -64,47 +95,17 @@ export default class LoginScreen extends Component {
             placeholder='Password'
             leftIcon={{ type: 'font-awesome', name: 'lock', paddingLeft: 5, paddingRight: 15 }}
           />
-          <FBLoginButton />
+          {/* <FBLoginButton /> */}
           
           <Button 
             title="Log In"
             style={styles.loginButton}
             // onPress={() => this.props.navigation.navigate('Main')}
-            onPress={() => this.loginHandler()}
+            onPress={() => this.signInWithFacebook()}
           />
         </View>
       </View>
     );
-  }
-}
-
-async function signInWithFacebook() {
-  const appId = Expo.Constants.manifest.extra.facebook.appId;
-  const permissions = ['public_profile', 'email'];  // Permissions required, consult Facebook docs
-  
-  const {
-    type,
-    token,
-  } = await Expo.Facebook.logInWithReadPermissionsAsync(
-    appId,
-    {permissions}
-  );
-
-  switch (type) {
-    case 'success': {
-      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);  // Set persistent auth state
-      const credential = firebase.auth.FacebookAuthProvider.credential(token);
-      const facebookProfileData = await firebase.auth().signInAndRetrieveDataWithCredential(credential);  // Sign in with Facebook credential
-
-      // Do something with Facebook profile data
-      // OR you have subscribed to auth state change, authStateChange handler will process the profile data
-      console.log("successful auth")
-      return Promise.resolve({type: 'success'});
-    }
-    case 'cancel': {
-      console.log("failed auth")
-      return Promise.reject({type: 'cancel'});
-    }
   }
 }
 
