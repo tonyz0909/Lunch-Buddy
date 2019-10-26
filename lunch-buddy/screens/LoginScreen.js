@@ -11,14 +11,40 @@ import {
 } from 'react-native';
 // import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button } from 'react-native-elements';
+import { db as firebase } from '../src/config';
+import Expo from 'expo';
+import * as Constants from 'expo-constants';
+// import { AccessToken, LoginButton } from 'react-native-fbsdk';
+// var FBLoginButton = require('./FBLoginButton');
+import FBLoginButton from './FBLoginButton';
 
 export default class LoginScreen extends Component {
 
-  state = {
-    email: '',
-    password: '',
-    errorMessage: '',
-  };
+  // state = {
+  //   email: '',
+  //   password: '',
+  //   errorMessage: '',
+  // };
+
+  async loginHandler() {
+    const FBSDK = require('react-native-fbsdk');
+    const {
+      LoginManager,
+    } = FBSDK;
+
+    const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
+    if (result.isCancelled) {
+      throw new Error('User cancelled the login process');
+    }
+
+    const data = await AccessToken.getCurrentAccessToken();
+    if (!data) {
+      throw new Error('Something went wrong obtaining access token');
+    }
+
+    const credential = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
+    await firebase.auth().signInWithCredential(credential);
+  }
 
   render() {
     return (
@@ -38,37 +64,47 @@ export default class LoginScreen extends Component {
             placeholder='Password'
             leftIcon={{ type: 'font-awesome', name: 'lock', paddingLeft: 5, paddingRight: 15 }}
           />
-
+          <FBLoginButton />
+          
           <Button 
             title="Log In"
             style={styles.loginButton}
             onPress={() => this.props.navigation.navigate('Main')}
           />
-    
-          {/* <TouchableOpacity
-            style={styles.signUpButton}
-            onPress={() => this.props.navigation.navigate('Home')}>
-            <Text style={styles.loginText}>Login</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-                style={styles.clearButton}
-                onPress={() => this.props.navigation.navigate('SignUp')}>
-                <Text style={styles.loginText}>Don't have an account?</Text>
-          </TouchableOpacity> */}
         </View>
       </View>
     );
   }
 }
 
-LoginScreen.navigationOptions = {
-  header: null,
-};
-
-function handleLearnMorePress() {
-  WebBrowser.openBrowserAsync(
-    'https://docs.expo.io/versions/latest/workflow/development-mode/'
+async function signInWithFacebook() {
+  const appId = Expo.Constants.manifest.extra.facebook.appId;
+  const permissions = ['public_profile', 'email'];  // Permissions required, consult Facebook docs
+  
+  const {
+    type,
+    token,
+  } = await Expo.Facebook.logInWithReadPermissionsAsync(
+    appId,
+    {permissions}
   );
+
+  switch (type) {
+    case 'success': {
+      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);  // Set persistent auth state
+      const credential = firebase.auth.FacebookAuthProvider.credential(token);
+      const facebookProfileData = await firebase.auth().signInAndRetrieveDataWithCredential(credential);  // Sign in with Facebook credential
+
+      // Do something with Facebook profile data
+      // OR you have subscribed to auth state change, authStateChange handler will process the profile data
+      console.log("successful auth")
+      return Promise.resolve({type: 'success'});
+    }
+    case 'cancel': {
+      console.log("failed auth")
+      return Promise.reject({type: 'cancel'});
+    }
+  }
 }
 
 const styles = StyleSheet.create({
