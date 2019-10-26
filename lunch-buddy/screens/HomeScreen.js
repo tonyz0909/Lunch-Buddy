@@ -81,6 +81,7 @@ export default class HomeScreen extends Component {
               title={<Text style={styles.boldText}>{"Enter Location:"}</Text>}
               subtitle={
                 <View style={styles.fixToText}>
+                  //TODO fix the double click 
                   <GooglePlacesAutocomplete
                     placeholder='Location Search'
                     minLength={2}
@@ -115,35 +116,41 @@ export default class HomeScreen extends Component {
           <View style={styles.inputs}>
             <ListItem
               key={0}
-              title={<Text style={styles.boldText}>{"Start Time:"}</Text>}
-              subtitle={
-                <View style={styles.fixToText}>
-                <Button title="Start" onPress={this.showDateTimePicker} buttonStyle={styles.button} />
-                <DateTimePicker
-                  isVisible={this.state.isDateTimePickerVisible}
-                  onConfirm={this.handleDatePicked}
-                  onCancel={this.hideDateTimePicker}
-                  datePickerModeAndroid="calendar"
-                  mode="datetime"
-                />
-                </View>}
+              title={
+                <View style= { styles.fixToText }>
+                <Text style={styles.boldText}>{"Start Time:"}</Text>
+                <View>
+                  <Icon name='edit' onPress={this.showDateTimePicker} />
+                  <DateTimePicker
+                    isVisible={this.state.isDateTimePickerVisible}
+                    onConfirm={this.handleDatePicked}
+                    onCancel={this.hideDateTimePicker}
+                    datePickerModeAndroid="calendar"
+                    mode="datetime"
+                  />
+                </View>
+                </View>
+              }
               bottomDivider
             />
             <ListItem 
               key={1}
-              title={<Text style={styles.boldText}>{"End Times:"}</Text>}
-              subtitle={
+              title={
                 <View style={styles.fixToText}>
-                <Button title="End" onPress={this.showDateTimePicker2} buttonStyle={styles.button} />
-                <DateTimePicker
-                  isVisible={this.state.isDateTimePickerVisible2}
-                  onConfirm={this.handleDatePicked2}
-                  onCancel={this.hideDateTimePicker2}
-                  datePickerModeAndroid="calendar"
-                  mode="datetime"
-                />
-                </View>}
-                bottomDivider
+                <Text style={styles.boldText}>{"End Time:"}</Text>
+                <View>
+                  <Icon name='edit' onPress={this.showDateTimePicker2} />
+                  <DateTimePicker
+                    isVisible={this.state.isDateTimePickerVisible2}
+                    onConfirm={this.handleDatePicked2}
+                    onCancel={this.hideDateTimePicker2}
+                    datePickerModeAndroid="calendar"
+                    mode="datetime"
+                  />
+                </View>
+                </View>
+              }
+              bottomDivider
             />
           </View>
 
