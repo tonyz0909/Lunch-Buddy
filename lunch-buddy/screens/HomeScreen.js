@@ -38,7 +38,6 @@ export default class HomeScreen extends Component {
               style={styles.welcomeImage}
             />
           </View>
-  
           <View style={styles.getStartedContainer}>
             <DevelopmentModeNotice />
   
