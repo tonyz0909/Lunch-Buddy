@@ -15,6 +15,24 @@ import { MonoText } from '../components/StyledText';
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import API from '../api.json';
+import { db } from '../src/config';
+
+function newRequest(fName, lName, email, phoneNumber) {
+  db.ref('/users').push({
+    userID, 
+    startTime,
+    endTime,
+    placeID,
+    matched,
+    matchID
+  }).then((data) => {
+    //success callback
+    console.log('data' , data)
+  }).catch((error) => {
+    //error callback
+    console.log('error ', error)
+  })
+}
 
 export default class HomeScreen extends Component {
   constructor(props) {
