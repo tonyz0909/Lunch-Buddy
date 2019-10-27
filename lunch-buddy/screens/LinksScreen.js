@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Alert, ScrollView, StyleSheet, View, StatusBar } from 'react-native';
-import { Button, Input, ListItem, Text } from 'react-native-elements';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Button, Input, Image, ListItem, Text } from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
 import { firebaseapp as fbase } from '../src/config';
 import API from '../api.json';
 import { db } from '../src/config';
+import snek from '../assets/images/snake.jpg';
 
 function newUser(fName, lName, email, phoneNumber) {
   db.ref('/users').push({
@@ -148,6 +149,22 @@ export default class LinksScreen extends Component {
     this.setState({
       location: null
     });
+    let user = fbase.auth().currentUser;
+    let db = fbase.firestore();
+    let profileRef = db.collection("users").doc(user.uid);
+    // update flake status
+    profileRef.update({
+      flakeToday: true
+    });
+
+    // delete request
+    db.collection("requests").doc(user.uid).delete().then(function () {
+      console.log("Request successfully deleted!");
+    }).catch(function (error) {
+      console.error("Error removing document: ", error);
+    });
+
+    // TODO: delete 'matchID' from matched person
   }
 
   submitEdits = () => {
@@ -248,11 +265,14 @@ export default class LinksScreen extends Component {
               }
             </View>
             :
-            <View>
-              < Text style={styles.boldText} >
+            <View style={styles.main}>
+              < Text style={styles.boldTextCentered} >
                 {"No lunch plan today :("}
               </Text >
-              <Button title="Create request" buttonStyle={styles.button} raised={true} onPress={this.flake} />
+              <Image source={snek} style={{ width: 210, height: 240 }} resizeMode="cover" PlaceholderContent={<ActivityIndicator />} />
+              <View style={styles.fixToText}>
+                <Button title="Create request" buttonStyle={styles.button} raised={true} onPress={() => this.setState({ location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318" })} />
+              </View>
             </View>
         }
       </ScrollView>
@@ -304,7 +324,8 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 15,
     backgroundColor: '#ffffff',
-    padding: 10
+    padding: 10,
+    alignItems: 'center'
   },
   color: {
     backgroundColor: '#ffb380',
@@ -315,6 +336,11 @@ const styles = StyleSheet.create({
   boldText: {
     fontSize: 18,
     fontWeight: "600"
+  },
+  boldTextCentered: {
+    fontSize: 18,
+    fontWeight: "600",
+    padding: 15
   },
   button: {
     width: 160
