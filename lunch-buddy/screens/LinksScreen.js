@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Alert, ScrollView, StyleSheet, View, StatusBar } from 'react-native';
-import { Button, Input, ListItem, Text } from 'react-native-elements';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Button, Input, Image, ListItem, Text } from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
 import { firebaseapp as fbase } from '../src/config';
 import API from '../api.json';
 import { db } from '../src/config';
+import snek from '../assets/images/snake.jpg';
 
 function newUser(fName, lName, email, phoneNumber) {
   db.ref('/users').push({
@@ -28,6 +29,23 @@ let addItem = item => {
 }
 
 export default class LinksScreen extends Component {
+  checkForFlakes = () => {
+    let user = fbase.auth().currentUser;
+    let db = fbase.firestore();
+    let profileRef = db.collection("users").doc(user.uid);
+    profileRef.onSnapshot(doc => {
+      if (doc.exists) {
+        data = doc.data();
+        this.setState({
+          flakeToday: data.flakeToday
+        });
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such user!");
+      }
+    });
+  }
+
   getRequest = () => {
     let user = fbase.auth().currentUser;
     let db = fbase.firestore();
@@ -116,9 +134,13 @@ export default class LinksScreen extends Component {
         location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
         start: "11:30am",
         end: "1:30pm",
-      }
+      },
+      flakeToday: false
     };
     this.getRequest = this.getRequest.bind(this);
+    this.checkForFlakes = this.checkForFlakes.bind(this);
+    // first and foremost, check for flakes
+    this.checkForFlakes();
     this.getRequest();
   }
 
@@ -126,6 +148,34 @@ export default class LinksScreen extends Component {
     Alert.alert('You flaker :(');
     this.setState({
       location: null
+    });
+    let user = fbase.auth().currentUser;
+    let db = fbase.firestore();
+    let profileRef = db.collection("users").doc(user.uid);
+    // update flake status
+    profileRef.update({
+      flakeToday: true
+    });
+
+    // delete 'matchID' from matched person
+    db.collection("requests").doc(user.uid).get().then(doc => {
+      if (doc.exists) {
+        matchID = doc.data().matchID;
+        db.collection("requests").doc(matchID).set({
+          matched: false,
+          matchID: ''
+        }, { merge: true });
+      } else {
+        console.log("match's request doc not found");
+      }
+      console.log("Request successfully deleted!");
+    });
+
+    // delete request
+    db.collection("requests").doc(user.uid).delete().then(function () {
+      console.log("Request successfully deleted!");
+    }).catch(function (error) {
+      console.error("Error removing document: ", error);
     });
   }
 
@@ -144,7 +194,7 @@ export default class LinksScreen extends Component {
     return (
       <ScrollView style={styles.container}>
         {
-          this.state.location ?
+          !this.state.flakeToday ?
             <View>
               {this.state.view === 'view' &&
                 <View>
@@ -227,11 +277,14 @@ export default class LinksScreen extends Component {
               }
             </View>
             :
-            <View>
-              < Text style={styles.boldText} >
+            <View style={styles.main}>
+              < Text style={styles.boldTextCentered} >
                 {"No lunch plan today :("}
               </Text >
-              <Button title="Create request" buttonStyle={styles.button} raised={true} onPress={this.flake} />
+              <Image source={snek} style={{ width: 210, height: 240 }} resizeMode="cover" PlaceholderContent={<ActivityIndicator />} />
+              <View style={styles.fixToText}>
+                <Button title="Create request" buttonStyle={styles.button} raised={true} onPress={() => this.setState({ location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318" })} />
+              </View>
             </View>
         }
       </ScrollView>
@@ -283,7 +336,8 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 15,
     backgroundColor: '#ffffff',
-    padding: 10
+    padding: 10,
+    alignItems: 'center'
   },
   color: {
     backgroundColor: '#ffb380',
@@ -294,6 +348,11 @@ const styles = StyleSheet.create({
   boldText: {
     fontSize: 18,
     fontWeight: "600"
+  },
+  boldTextCentered: {
+    fontSize: 18,
+    fontWeight: "600",
+    padding: 15
   },
   button: {
     width: 160
