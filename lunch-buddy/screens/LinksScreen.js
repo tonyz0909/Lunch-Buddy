@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View, StatusBar } from 'react-native';
 import { Button, Input, ListItem, Text } from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
 import { firebaseapp as fbase } from '../src/config';
@@ -8,25 +8,60 @@ import { db } from '../src/config';
 
 export default class LinksScreen extends Component {
   getRequest = () => {
-    var user = fbase.auth().currentUser;
-    var db = fbase.firestore();
-    var profileRef = db.collection("requests").doc(user.uid);
+    let user = fbase.auth().currentUser;
+    let db = fbase.firestore();
+    let profileRef = db.collection("requests").doc(user.uid);
     profileRef.onSnapshot(doc => {
       console.log('updated snapshot');
       if (doc.exists) {
-        console.log("Document data:", doc.data());
-        this.setState({
-          location: doc.data().placeID.toString(),
-          start: doc.data().startTime.toString(),
-          end: doc.data().endTime.toString(),
-          matched: doc.data().matched,
-          match: doc.data().matchID,
-          edits: {
-            location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
-            start: "11:30am",
-            end: "1:30pm",
-          }
-        });
+        // console.log("Document data:", doc.data());
+        // console.log("Start Time:", doc.data().startTime.toDate().toLocaleTimeString('en-US'))
+
+        let url = 'https://maps.googleapis.com/maps/api/place/details/json?';
+        let place_id = "place_id=" + doc.data().placeID.toString();
+        let fields = "fields=name,formatted_address"
+        let key = "key=" + API["googlemaps"]
+        let requestReverseGeoCode = url + place_id + "&" + fields + "&" + key
+
+        fetch("https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJx9EaGRoE9YgR7Je8EHoBBRo&fields=name,formatted_address&key=AIzaSyCwt1IlfjmH9cOk3FOLkMr4sORPsL5PT68", {
+          "method": "GET",
+          "headers": {}
+        })
+          .then(response => response.json())
+          .then((data => {
+            // console.log("fetch response: " + JSON.stringify(data));
+            let locationString = data.result.name + ", " + data.result.formatted_address
+            this.setState({
+              location: locationString,
+              start: doc.data().startTime.toDate().toLocaleTimeString('en-US'),
+              end: doc.data().endTime.toDate().toLocaleTimeString('en-US'),
+              matched: doc.data().matched,
+              match: doc.data().matchID,
+              edits: {
+                location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
+                start: "11:30am",
+                end: "1:30pm",
+              }
+            });
+
+            // query for name of matched person
+            if (doc.data().matched) {
+              let db = fbase.firestore();
+              let profileRef = db.collection("users").doc(doc.data().matchID);
+              profileRef.onSnapshot(doc => {
+                if (doc.exists) {
+                  console.log(doc.data())
+                  this.setState({ match: doc.data().name })
+                } else {
+                  "unable to get name of match";
+                }
+              });
+            }
+
+          }))
+          .catch(err => {
+            console.log(err);
+          });
       } else {
         // doc.data() will be undefined in this case
         console.log("No Request!");
@@ -147,6 +182,14 @@ export default class LinksScreen extends Component {
                     subtitle={<Text style={styles.ratingText}>{this.state.matched ? "Yes" : "No"}</Text>}
                     bottomDivider
                   />
+                  {this.state.matched &&
+                    <ListItem
+                      key={4}
+                      title={<Text style={styles.boldText}>{"Match: "}</Text>}
+                      subtitle={<Text style={styles.ratingText}>{this.state.match}</Text>}
+                      bottomDivider
+                    />
+                  }
                   <View style={styles.fixToText}>
                     <Button title="Edit" buttonStyle={styles.button} raised={true} onPress={() => this.setState({ view: "edit" })} />
                     <Button title="Flake" buttonStyle={styles.button} raised={true} onPress={this.setFlake} />
@@ -158,17 +201,24 @@ export default class LinksScreen extends Component {
                   <ListItem
                     key={0}
                     title={<Text style={styles.boldText}>{"Location:"}</Text>}
-                    subtitle={<Input
-                      placeholder={this.state.location}
-                      onChangeText={text => this.setState({ edits: { ...this.state.edits, location: text } })} />}
+                    subtitle={
+                      <Input
+                        style={styles.subtitleFont}
+                        placeholder={this.state.location}
+                        onChangeText={text => this.setState({ edits: { ...this.state.edits, location: text } })}
+                      />
+                    }
                     bottomDivider
                   />
                   <ListItem
                     key={1}
                     title={<Text style={styles.boldText}>{"Lunch start time:"}</Text>}
-                    subtitle={<Input
-                      placeholder={this.state.start}
-                      onChangeText={text => this.setState({ edits: { ...this.state.edits, start: text } })} />}
+                    subtitle={
+                      <Input
+                        placeholder={this.state.start}
+                        onChangeText={text => this.setState({ edits: { ...this.state.edits, start: text } })} />
+
+                    }
                     bottomDivider
                   />
                   <ListItem
@@ -204,6 +254,9 @@ LinksScreen.navigationOptions = {
 };
 
 const styles = StyleSheet.create({
+  subtitleFont: {
+    fontWeight: "600",
+  },
   main: {
     flex: 1,
     paddingTop: 15,

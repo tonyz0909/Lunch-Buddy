@@ -15,13 +15,13 @@ import { MonoText } from '../components/StyledText';
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import API from '../api.json';
-import { firebaseapp as fbase} from '../src/config';
+import { firebaseapp as fbase } from '../src/config';
 
-//real time database 
+//real time database
 // function newRequest(placeID, startTime, endTime) {
 //   matched = false;
 //   db.ref('/requests').push({
-//     //userID, 
+//     //userID,
 //     start,
 //     end,
 //     placeID,
@@ -43,11 +43,11 @@ export default class HomeScreen extends Component {
       isDateTimePickerVisible: false,
       isDateTimePickerVisible2: false,
       locationPlaceID: null, //string - place_id
-      lunchStartDateTime: null, // datetime object - start 
-      lunchEndDateTime: null, // datetime object - end 
+      lunchStartDateTime: null, // datetime object - start
+      lunchEndDateTime: null, // datetime object - end
     };
-    this.lunchstartstring = "" // TEST start date time string 
-    this.lunchendstring = "" // TEST end date time string 
+    this.lunchstartstring = "" // TEST start date time string
+    this.lunchendstring = "" // TEST end date time string
   }
 
   showDateTimePicker = () => {
@@ -78,19 +78,63 @@ export default class HomeScreen extends Component {
     this.setState({ locationPlaceID: str });
   }
 
-  handleSubmit= () => {
-    var user = fbase.auth().currentUser; 
-    console.log(user);
-    var db = fbase.firestore();
-    var profileRef = db.collection("requests").doc(user.uid);
+  handleSubmit = async () => {
+    let user = fbase.auth().currentUser;
+    // console.log(user);
+    let db = fbase.firestore();
+    let profileRef = db.collection("requests").doc(user.uid);
+    let matchID = await this.searchForMatch(this.state.lunchStartDateTime, this.state.lunchEndDateTime, this.state.locationPlaceID, user.uid);
+    let matched = this.matchID !== null;
+    console.log("matched: " + matched)
     profileRef.set({
       userID: user.uid,
       startTime: this.state.lunchStartDateTime,
       endTime: this.state.lunchEndDateTime,
       placeID: this.state.locationPlaceID,
-      matched: false,
-      matchID: ''
-    }, { merge: true});
+      matched,
+      matchID: matchID
+    }, { merge: true });
+  }
+
+  makeMatch = (newRequestUID, existingRequestUID) => {
+    let profileRef = db.collection("requests").doc(existingRequestUID);
+    return profileRef.update({
+      matched: true,
+      matchID: newRequestUID
+    });
+  }
+
+  searchForMatch = async (start, end, locationID, userID) => {
+    return new Promise((resolve, reject) => {
+      let db = fbase.firestore();
+      let requestsRef = db.collection("requests")
+      requestsRef.get().then((querySnapshot) => {
+        querySnapshot.forEach(function (doc) {
+          // doc.data() is never undefined for query doc snapshots
+          data = doc.data()
+          console.log(doc.id, " => ", data);
+          console.log(data.placeID);
+          if (data.placeID === locationID) {
+            console.log("location matched!");
+            if ((end.getTime() - data.startTime.seconds) / 60 >= 30
+              || (data.endTime.seconds - start.getTime()) / 60 >= 30) {
+              console.log("matched!")
+              let profileRef = db.collection("requests").doc(data.userID);
+              profileRef.update({
+                matched: true,
+                matchID: userID
+              })
+              return resolve(data.userID);
+            }
+          }
+        });
+        window.setTimeout(() => resolve(null), 5000);
+      })
+        .catch(function (error) {
+          console.log("Error getting documents: ", error);
+          reject();
+        });
+    })
   }
 
   submit = () => {
@@ -100,17 +144,17 @@ export default class HomeScreen extends Component {
       if (this.state.lunchStartDateTime > this.state.lunchEndDateTime) {
         Alert.alert("End Time is before Start Time!");
       } else {
-    //debug purposes 
-        let request = { 
+        //debug purposes
+        let request = {
           location: this.state.locationPlaceID,
           startTime: this.state.lunchStartDateTime,
           endTime: this.state.lunchEndDateTime,
         }
-        console.log(request); 
+        // console.log(request);
         //firebase entry
         this.handleSubmit();
         Alert.alert("request saved");
-        //Alert.alert("test"); //Just to not crash stuff 
+        //Alert.alert("test"); //Just to not crash stuff
       }
     }
   }
@@ -124,9 +168,16 @@ export default class HomeScreen extends Component {
           <View style={styles.inputs}>
             <ListItem
               key={0}
-              title={<Text style={styles.boldText}>{"Enter Location:"}</Text>}
+              title={
+                <Text style={styles.times}>
+                  <Text style={styles.boldText}>{"Enter Location:"}</Text>
+                </Text>
+              }
               subtitle={
-                //TODO fix the double click 
+                //TODO fix the double click
+                <View style={styles.times}>
+                <ScrollView>
+
                 <GooglePlacesAutocomplete
                   placeholder='Location Search'
                   minLength={2}
@@ -137,9 +188,25 @@ export default class HomeScreen extends Component {
                   renderDescription={row => row.description}
                   onPress={
                     (data, details = null) => { // 'details' is provided when fetchDetails = true
-                      console.log(data.place_id)
+                      // console.log(data.place_id)
                       this.handleLocationPicked(data.place_id)
                     }}
+                  styles={{
+                    textInputContainer: {
+                      backgroundColor: 'rgba(0,0,0,0)',
+                      borderTopWidth: 0,
+                      borderBottomWidth: 1,
+                      borderColor: "black",
+                    },
+                    textInput: {
+                      fontWeight: '400',
+                      fontSize: 18,
+                    },
+                    description: {
+                      fontWeight: '200',
+                      fontSize: 14, //TODO side scrolling?
+                    }
+                  }}
                   getDefaultValue={() => ''}
                   query={{
                     // available options: https://developers.google.com/places/web-service/autocomplete
@@ -152,6 +219,8 @@ export default class HomeScreen extends Component {
                     rankby: 'distance',
                   }}
                 />
+                </ScrollView>
+                </View>
               }
               bottomDivider
             />
@@ -208,10 +277,15 @@ export default class HomeScreen extends Component {
           {/* <Text style={styles.getStartedText}>
             This is a string: {this.state.locationPlaceID}
           </Text> */}
-
-
-          <View style={styles.fixToText}>
-            <Button title="Submit Request!" buttonStyle={styles.button} raised={true} onPress={this.submit} />
+          <View>
+          <ListItem
+            key={0}
+            title={
+              <View style={styles.fixToText}>
+                <Button title="Submit Request!" buttonStyle={styles.button} raised={true} onPress={this.submit} />
+              </View>
+            }
+          />
           </View>
         </ScrollView>
       </View>
@@ -285,6 +359,7 @@ const styles = StyleSheet.create({
   times: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    alignItems: 'flex-start',
     margin: 10
   },
   button: {
