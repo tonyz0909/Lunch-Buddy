@@ -16,6 +16,9 @@ import DateTimePicker from "react-native-modal-datetime-picker";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import API from '../api.json';
 import { firebaseapp as fbase} from '../src/config';
+import * as Permissions from 'expo-permissions';
+import * as Location from 'expo-location';
+import { Notifications } from 'expo';
 
 //real time database 
 // function newRequest(placeID, startTime, endTime) {
@@ -113,6 +116,57 @@ export default class HomeScreen extends Component {
         //Alert.alert("test"); //Just to not crash stuff 
       }
     }
+  }
+
+  registerForPushNotificationsAsync = async() => {
+    const { status: existingStatus } = await Permissions.getAsync(
+      Permissions.NOTIFICATIONS
+    );
+    let finalStatus = existingStatus;
+  
+    // only ask if permissions have not already been determined, because
+    // iOS won't necessarily prompt the user a second time.
+    if (existingStatus !== 'granted') {
+      // Android remote notification permissions are granted during the app
+      // install, so this will only ask on iOS
+      const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+      finalStatus = status;
+    }
+  
+    // Stop here if the user did not grant permissions
+    if (finalStatus !== 'granted') {
+      return;
+    }
+  
+    // Get the token that uniquely identifies this device
+    let token = await Notifications.getExpoPushTokenAsync();
+  
+    // POST the token to your backend server from where you can retrieve it to send push notifications.
+    var profileRef = fbase.firestore().collection("users").doc(this.currentUser.uid);
+    var setWithMerge = profileRef.set({
+      pushToken : {token}
+    }, { merge: true });
+  }
+
+  sendPushNotification = (pushToken) => {
+    let response = fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        to: {pushToken},
+        sound: 'default',
+        title: 'Demo',
+        body: 'Demo notificaiton'
+      })
+    });
+  };
+
+  async componentDidMount() {
+    this.currentUser = fbase.auth().currentUser;
+    await this.registerForPushNotificationsAsync();
   }
 
   render() {
@@ -234,20 +288,22 @@ export default class HomeScreen extends Component {
             This is a string: {this.state.locationPlaceID}
           </Text> */}
           <View>
-          <ListItem
-            key={0}
-            title={
-              <View style={styles.fixToText}>
-                <Button title="Submit Request!" buttonStyle={styles.button} raised={true} onPress={this.submit} />
-              </View>
-            }
-          />
+            <ListItem
+              key={0}
+              title={
+                <View style={styles.fixToText}>
+                  <Button title="Submit Request!" buttonStyle={styles.button} raised={true} onPress={this.submit} />
+                </View>
+              }
+            />
           </View>
         </ScrollView>
       </View>
     );
   }
 }
+
+
 
 HomeScreen.navigationOptions = {
   header: null,
