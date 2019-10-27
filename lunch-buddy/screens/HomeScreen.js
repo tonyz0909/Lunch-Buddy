@@ -233,7 +233,7 @@ export default class HomeScreen extends Component {
               title={
                 <View style={styles.times}>
                   <Text style={styles.boldText}>{"Start Time:"}</Text>
-                  <Text style={styles.timeText}> {this.lunchstartstring ? this.lunchstartstring : "12:00:00 PM"} </Text>
+                  <Text style={styles.timeText}> {this.lunchstartstring ? this.lunchstartstring : "Plz Enter"} </Text>
                   <View>
                     <Icon name='edit' onPress={this.showDateTimePicker} />
                     <DateTimePicker
@@ -253,7 +253,7 @@ export default class HomeScreen extends Component {
               title={
                 <View style={styles.times}>
                   <Text style={styles.boldText}>{"End Time:"}</Text>
-                  <Text style={styles.timeText}>{this.lunchendstring ? this.lunchendstring : "2:00:00 PM"} </Text>
+                  <Text style={styles.timeText}>{this.lunchendstring ? this.lunchendstring : "Plz Enter"} </Text>
                   <View>
                     <Icon name='edit' onPress={this.showDateTimePicker2} />
                     <DateTimePicker
@@ -338,7 +338,7 @@ function handleHelpPress() {
 
 const styles = StyleSheet.create({
   timeText: {
-    fontSize: 16,
+    fontSize: 20,
   },
   inputs: {
     flex: 1,
