@@ -179,25 +179,33 @@ export default class LinksScreen extends Component {
 
     this.setState({
       view: 'view',
-      // location: this.state.edits.location,
-      // start: this.state.edits.start,
-      // end: this.state.edits.end,
     });
     
-    // if (this.state.lunchStartDateTime != null || this.lunchEndDateTime != null) {
-    //   if (this.state.lunchStartDateTime > this.state.lunchEndDateTime) {
-    //     Alert.alert("End Time is before Start Time!");
-    //   } 
-    // } 
-    var user = fbase.auth().currentUser;
-    var db = fbase.firestore();
-    var profileRef = db.collection("requests").doc(user.uid).update({
-      placeID: this.state.locationPlaceID,
-      startTime: this.state.lunchStartDateTime,
-      endTime: this.state.lunchEndDateTime,
-    }).then(function() {
-      Alert.alert("Fields have been Updated")
-    });
+    if (this.state.lunchStartDateTime != null || this.lunchEndDateTime != null) {
+      if (this.state.lunchStartDateTime > this.state.lunchEndDateTime) {
+        Alert.alert("End Time is before Start Time!");
+      }  else { 
+        var user = fbase.auth().currentUser;
+        var db = fbase.firestore();
+        var profileRef = db.collection("requests").doc(user.uid).update({
+          placeID: this.state.locationPlaceID,
+          startTime: this.state.lunchStartDateTime,
+          endTime: this.state.lunchEndDateTime,
+        }).then(function () {
+          Alert.alert("Fields have been Updated")
+        });
+      }
+    } else {
+      var user = fbase.auth().currentUser;
+      var db = fbase.firestore();
+      var profileRef = db.collection("requests").doc(user.uid).update({
+        placeID: this.state.locationPlaceID,
+        startTime: this.state.lunchStartDateTime,
+        endTime: this.state.lunchEndDateTime,
+      }).then(function() {
+        Alert.alert("Fields have been Updated")
+      });
+    }
     
   }
 
@@ -234,9 +242,10 @@ export default class LinksScreen extends Component {
                     bottomDivider
                   />
                   <View style={styles.fixToText}>
-                    <Button title="Edit" buttonStyle={styles.button} raised={true} onPress={() => this.setState({ view: "edit" })} />
+                    {!this.state.matched && <View><Button title="Edit" buttonStyle={styles.button} raised={true} onPress={() => this.setState({ view: "edit" })} /></View>}
                     <Button title="Flake" buttonStyle={styles.button} raised={true} onPress={this.flake} />
                   </View>
+                  
                 </View>
               }
 
@@ -301,27 +310,7 @@ export default class LinksScreen extends Component {
                     }
                     bottomDivider
                   />
-                  {/* render the pens  */}
-                {/* <ListItem
-                    key={0}
-                    title={
-                      <View style={styles.times}>
-                        <Text style={styles.boldText}>{"Start Time:"}</Text>
-                        <Text style={styles.timeText}> {this.lunchstartstring ? this.lunchstartstring : "12:00:00 PM"} </Text>
-                        <View>
-                          <Icon name='edit' onPress={this.showDateTimePicker} />
-                          <DateTimePicker
-                            isVisible={this.state.isDateTimePickerVisible}
-                            onConfirm={this.handleDatePicked}
-                            onCancel={this.hideDateTimePicker}
-                            datePickerModeAndroid="calendar"
-                            mode="datetime"
-                          />
-                        </View>
-                      </View>
-                    }
-                    bottomDivider
-                  /> */}
+                
                   <ListItem
                     key={1}
                     title={
@@ -340,11 +329,6 @@ export default class LinksScreen extends Component {
                         </View>
                       </View>
                     }
-                    // subtitle={
-                    //   <Input
-                    //   placeholder={this.state.start}
-                    //   onChangeText={text => this.setState({ edits: { ...this.state.edits, start: text } })} />
-                    //   }
                     bottomDivider
                   />
                   <ListItem
@@ -365,11 +349,6 @@ export default class LinksScreen extends Component {
                       </View>
                     </View>
                   }
-                    // subtitle={
-                    //  <Input
-                    //   placeholder={this.state.end}
-                    //   onChangeText={text => this.setState({ edits: { ...this.state.edits, end: text } })} />
-                    // }
                     bottomDivider
                   />
                   <View style={styles.fixToText}>
@@ -396,37 +375,6 @@ LinksScreen.navigationOptions = {
   title: 'Your Lunch Requests',
 };
 
-// export default class LinksScreen extends Component {
-//   state = {
-//     name: ''
-//   };
-
-//   handleChange = e => {
-//     this.setState({
-//       name: e.nativeEvent.text
-//     });
-//   };
-//   handleSubmit = () => {
-//     addItem(this.state.name);
-//     AlertIOS.alert('Item saved successfully');
-//   };
-
-//   render() {
-//     return (
-//       <View style={styles.main}>
-//         <Text style={styles.title}>Add Item</Text>
-//         <TextInput style={styles.itemInput} onChange={this.handleChange} />
-//         <TouchableHighlight
-//           style={styles.button}
-//           underlayColor="white"
-//           onPress={this.handleSubmit}
-//         >
-//           <Text style={styles.buttonText}>Add</Text>
-//         </TouchableHighlight>
-//       </View>
-//     );
-//   }
-// }
 
 const styles = StyleSheet.create({
   timeText:{
