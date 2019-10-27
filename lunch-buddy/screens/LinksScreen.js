@@ -66,41 +66,41 @@ export default class LinksScreen extends Component {
           "method": "GET",
           "headers": {}
         })
-          .then(response => response.json())
-          .then((data => {
-            // console.log("fetch response: " + JSON.stringify(data));
-            let locationString = data.result.name + ", " + data.result.formatted_address
-            this.setState({
-              location: locationString,
-              start: doc.data().startTime.toDate().toLocaleTimeString('en-US'),
-              end: doc.data().endTime.toDate().toLocaleTimeString('en-US'),
-              matched: doc.data().matched,
-              match: doc.data().matchID,
-              edits: {
-                location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
-                start: "11:30am",
-                end: "1:30pm",
-              }
-            });
-
-        // query for name of matched person
-        if (doc.data().matched) {
-          let db = fbase.firestore();
-          let profileRef = db.collection("users").doc(doc.data().matchID);
-          profileRef.onSnapshot(doc => {
-            if (doc.exists) {
-              console.log(doc.data())
-              this.setState({ match: doc.data().name })
-            } else {
-              "unable to get name of match";
+        .then(response => response.json())
+        .then((data => {
+          // console.log("fetch response: " + JSON.stringify(data));
+          let locationString = data.result.name + ", " + data.result.formatted_address
+          this.setState({
+            location: locationString,
+            start: doc.data().startTime.toDate().toLocaleTimeString('en-US'),
+            end: doc.data().endTime.toDate().toLocaleTimeString('en-US'),
+            matched: doc.data().matched,
+            match: doc.data().matchID,
+            edits: {
+              location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
+              start: "11:30am",
+              end: "1:30pm",
             }
           });
-        }
 
-
-       else {
-        // doc.data() will be undefined in this case
-        console.log("No such document!");
+            // query for name of matched person
+          if (doc.data().matched) {
+            let db = fbase.firestore();
+            let profileRef = db.collection("users").doc(doc.data().matchID);
+            profileRef.onSnapshot(doc => {
+              if (doc.exists) {
+                console.log(doc.data())
+                this.setState({ match: doc.data().name })
+              } else {
+                "unable to get name of match";
+              }
+            });
+          }
+          else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+          }
+        }));
       }
     });
   }
