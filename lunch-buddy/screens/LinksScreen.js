@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { Alert, ScrollView, StyleSheet, View, StatusBar } from 'react-native';
-import { Button, Input, ListItem, Text } from 'react-native-elements';
+import { Button, Icon, Input, ListItem, Text } from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
 import { firebaseapp as fbase} from '../src/config';
 import API from '../api.json';
 import { db } from '../src/config';
+import DateTimePicker from "react-native-modal-datetime-picker";
+
 
 function newUser(fName, lName, email, phoneNumber) {
   db.ref('/users').push({
@@ -28,6 +30,36 @@ let addItem = item => {
 }
 
 export default class LinksScreen extends Component {
+  showDateTimePicker = () => {
+    this.setState({ isDateTimePickerVisible: true });
+  };
+  hideDateTimePicker = () => {
+    this.setState({ isDateTimePickerVisible: false });
+  };
+  handleDatePicked = date => {
+    this.lunchstartstring = date.toLocaleTimeString('en-US');
+    this.setState({ lunchStartDateTime: date });
+    this.setState({ edits: { ...this.state.edits, start: this.lunchstartstring } })
+    this.hideDateTimePicker();
+  };
+
+  showDateTimePicker2 = () => {
+    this.setState({ isDateTimePickerVisible2: true });
+  };
+  hideDateTimePicker2 = () => {
+    this.setState({ isDateTimePickerVisible2: false });
+  };
+  handleDatePicked2 = date => {
+    this.lunchendstring = date.toLocaleTimeString('en-US');
+    this.setState({ lunchEndDateTime: date });
+    this.setState({ edits: {...this.state.edits, end: this.lunchendstring } })
+    this.hideDateTimePicker2();
+  };
+
+  handleLocationPicked = str => {
+    this.setState({ locationPlaceID: str });
+  }
+
   getRequest = () => {
     var user = fbase.auth().currentUser; 
     var db = fbase.firestore();
@@ -50,6 +82,7 @@ export default class LinksScreen extends Component {
         .then(response => response.json())
         .then((data => {
           // console.log("fetch response: " + JSON.stringify(data)); 
+        
           let locationString = data.result.name + ", " + data.result.formatted_address 
           this.setState({
             location: locationString,
@@ -84,18 +117,6 @@ export default class LinksScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      // titleText: "Your Requests",
-      // view: "view",
-      // location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
-      // start: "11:30am",
-      // end: "1:30pm",
-      // matched: false,
-      // match: null,
-      // edits: {
-      //   location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
-      //   start: "11:30am",
-      //   end: "1:30pm",
-      // }
       titleText: '',
       view: 'view',
       location: 'Testing testing',
@@ -107,8 +128,16 @@ export default class LinksScreen extends Component {
         location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
         start: "11:30am",
         end: "1:30pm",
-      }
+      },
+      isDateTimePickerVisible: false,
+      isDateTimePickerVisible2: false,
+      locationPlaceID: null, //string - place_id
+      lunchStartDateTime: null, // datetime object - start 
+      lunchEndDateTime: null, // datetime object - end
+      
     };
+    this.lunchstartstring = "" // TEST start date time string 
+    this.lunchendstring = ""
     this.getRequest = this.getRequest.bind(this);
     this.getRequest();
   }
@@ -169,8 +198,11 @@ export default class LinksScreen extends Component {
                   </View>
                 </View>
               }
+
+              {/* ON EDIT  */}
               {this.state.view === 'edit' &&
                 <View>
+                  {/* TODO LATER  */}
                   <ListItem
                     key={0}
                     title={<Text style={styles.boldText}>{"Location:"}</Text>}
@@ -183,23 +215,75 @@ export default class LinksScreen extends Component {
                       }
                     bottomDivider
                   />
+                  {/* render the pens  */}
+                {/* <ListItem
+                    key={0}
+                    title={
+                      <View style={styles.times}>
+                        <Text style={styles.boldText}>{"Start Time:"}</Text>
+                        <Text style={styles.timeText}> {this.lunchstartstring ? this.lunchstartstring : "12:00:00 PM"} </Text>
+                        <View>
+                          <Icon name='edit' onPress={this.showDateTimePicker} />
+                          <DateTimePicker
+                            isVisible={this.state.isDateTimePickerVisible}
+                            onConfirm={this.handleDatePicked}
+                            onCancel={this.hideDateTimePicker}
+                            datePickerModeAndroid="calendar"
+                            mode="datetime"
+                          />
+                        </View>
+                      </View>
+                    }
+                    bottomDivider
+                  /> */}
                   <ListItem
                     key={1}
-                    title={<Text style={styles.boldText}>{"Lunch start time:"}</Text>}
-                    subtitle={
-                      <Input
-                      placeholder={this.state.start}
-                      onChangeText={text => this.setState({ edits: { ...this.state.edits, start: text } })} />
-                      
-                      }
+                    title={
+                      <View style={styles.times}>
+                        <Text style={styles.boldText}>{"Start Time:"}</Text>
+                        <Text style={styles.timeText}> {this.lunchstartstring ? this.lunchstartstring : this.state.start} </Text>
+                        <View>
+                          <Icon name='edit' onPress={this.showDateTimePicker} />
+                          <DateTimePicker
+                            isVisible={this.state.isDateTimePickerVisible}
+                            onConfirm={this.handleDatePicked}
+                            onCancel={this.hideDateTimePicker}
+                            datePickerModeAndroid="calendar"
+                            mode="datetime"
+                          />
+                        </View>
+                      </View>
+                    }
+                    // subtitle={
+                    //   <Input
+                    //   placeholder={this.state.start}
+                    //   onChangeText={text => this.setState({ edits: { ...this.state.edits, start: text } })} />
+                    //   }
                     bottomDivider
                   />
                   <ListItem
                     key={2}
-                    title={<Text style={styles.boldText}>{"Lunch end time:"}</Text>}
-                    subtitle={<Input
-                      placeholder={this.state.end}
-                      onChangeText={text => this.setState({ edits: { ...this.state.edits, end: text } })} />}
+                  title={
+                    <View style={styles.times}>
+                      <Text style={styles.boldText}>{"End Time:"}</Text>
+                      <Text style={styles.timeText}>{this.lunchendstring ? this.lunchendstring : this.state.end} </Text>
+                      <View>
+                        <Icon name='edit' onPress={this.showDateTimePicker2} />
+                        <DateTimePicker
+                          isVisible={this.state.isDateTimePickerVisible2}
+                          onConfirm={this.handleDatePicked2}
+                          onCancel={this.hideDateTimePicker2}
+                          datePickerModeAndroid="calendar"
+                          mode="datetime"
+                        />
+                      </View>
+                    </View>
+                  }
+                    // subtitle={
+                    //  <Input
+                    //   placeholder={this.state.end}
+                    //   onChangeText={text => this.setState({ edits: { ...this.state.edits, end: text } })} />
+                    // }
                     bottomDivider
                   />
                   <View style={styles.fixToText}>
@@ -259,6 +343,15 @@ LinksScreen.navigationOptions = {
 // }
 
 const styles = StyleSheet.create({
+  timeText:{
+    fontSize: 20,
+  },
+  times: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'flex-start',
+    margin: 10
+  },
   subtitleFont: { 
     fontWeight: "600",
   },

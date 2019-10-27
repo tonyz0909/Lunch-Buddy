@@ -294,7 +294,7 @@ function handleHelpPress() {
 
 const styles = StyleSheet.create({
   timeText: {
-    fontSize: 16,
+    fontSize: 20,
   },
   inputs: {
     flex: 1,
