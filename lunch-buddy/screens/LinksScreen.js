@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Icon, Input, Image, ListItem, Text } from 'react-native-elements';
+import { WebBrowser } from 'expo';
 import { ExpoLinksView } from '@expo/samples';
 import { firebaseapp as fbase } from '../src/config';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import API from '../api.json';
 import { db } from '../src/config';
 import snek from '../assets/images/snake.jpg';
@@ -95,7 +97,7 @@ export default class LinksScreen extends Component {
         let key = "key=" + API["googlemaps"]
         let requestReverseGeoCode = url + place_id + "&" + fields + "&" + key
 
-        fetch("https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJx9EaGRoE9YgR7Je8EHoBBRo&fields=name,formatted_address&key=AIzaSyCwt1IlfjmH9cOk3FOLkMr4sORPsL5PT68", {
+        fetch(requestReverseGeoCode, {
           "method": "GET",
           "headers": {}
         })
@@ -263,6 +265,10 @@ export default class LinksScreen extends Component {
     }
   }
 
+  link = () => {
+    Linking.openURL('fb-messenger://user-thread/heatwave23');
+  }
+
   render() {
     return (
       <ScrollView style={styles.container}>
@@ -299,7 +305,7 @@ export default class LinksScreen extends Component {
                     <ListItem
                       key={4}
                       title={<Text style={styles.boldText}>{"Match: "}</Text>}
-                      subtitle={<Text style={styles.ratingText}>{this.state.match}</Text>}
+                      subtitle={<View style={styles.fixToTextBetween}><Text style={styles.ratingText}>{this.state.match}</Text><MaterialCommunityIcons name="facebook-messenger" size={32} color="#006AFF" onPress={this.link}/></View>}
                       bottomDivider
                     />
                   }
@@ -474,8 +480,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     margin: 10
   },
+  fixToTextBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   ratingText: {
     fontSize: 18,
     color: 'grey'
+  },
+  ratingTextLink: {
+    fontSize: 18,
+    color: '#0066ff'
   }
 });
