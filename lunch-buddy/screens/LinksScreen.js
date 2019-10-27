@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Alert, ScrollView, StyleSheet, View, StatusBar } from 'react-native';
 import { Button, Icon, Input, ListItem, Text } from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
-import { firebaseapp as fbase} from '../src/config';
+import { firebaseapp as fbase } from '../src/config';
 import API from '../api.json';
 import { db } from '../src/config';
 import DateTimePicker from "react-native-modal-datetime-picker";
@@ -17,7 +17,7 @@ function newUser(fName, lName, email, phoneNumber) {
     phoneNumber
   }).then((data) => {
     //success callback
-    console.log('data' , data)
+    console.log('data', data)
   }).catch((error) => {
     //error callback
     console.log('error ', error)
@@ -59,40 +59,41 @@ export default class LinksScreen extends Component {
 
   handleLocationPicked = str => {
     this.setState({ locationPlaceID: str });
-    console.log(this.state.locationPlaceID); 
+    console.log(this.state.locationPlaceID);
   }
 
   getRequest = () => {
-    var user = fbase.auth().currentUser; 
-    var db = fbase.firestore();
-    var profileRef = db.collection("requests").doc(user.uid);
-    profileRef.get().then(doc => {
+    let user = fbase.auth().currentUser;
+    let db = fbase.firestore();
+    let profileRef = db.collection("requests").doc(user.uid);
+    profileRef.onSnapshot(doc => {
+      console.log('updated snapshot');
       if (doc.exists) {
         // console.log("Document data:", doc.data());
         // console.log("Start Time:", doc.data().startTime.toDate().toLocaleTimeString('en-US'))
-        
+
         let url = 'https://maps.googleapis.com/maps/api/place/details/json?';
         let place_id = "place_id=" + doc.data().placeID.toString();
         let fields = "fields=name,formatted_address"
         let key = "key=" + API["googlemaps"]
         let requestReverseGeoCode = url + place_id + "&" + fields + "&" + key
-        console.log(requestReverseGeoCode); 
+        console.log(requestReverseGeoCode);
         fetch(requestReverseGeoCode, {
           "method": "GET",
           "headers": {}
         })
         .then(response => response.json())
         .then((data => {
-          // console.log("fetch response: " + JSON.stringify(data)); 
-        
-          let locationString = data.result.name + ", " + data.result.formatted_address 
+          // console.log("fetch response: " + JSON.stringify(data));
+
+          let locationString = data.result.name + ", " + data.result.formatted_address
           this.setState({
             location: locationString,
             locationPlaceID: place_id,
             start: doc.data().startTime.toDate().toLocaleTimeString('en-US'),
             lunchStartDateTime: doc.data().startTime.toDate(),
             end: doc.data().endTime.toDate().toLocaleTimeString('en-US'),
-            lunchEndDateTime: doc.data().endTime.toDate(), 
+            lunchEndDateTime: doc.data().endTime.toDate(),
             matched: doc.data().matched,
             match: doc.data().matchID,
             edits: {
@@ -103,21 +104,36 @@ export default class LinksScreen extends Component {
           });
         }))
         .catch(err => {
-          console.log(err); 
+          console.log(err);
         });
 
-        
 
 
-    } else {
+            // query for name of matched person
+            if (doc.data().matched) {
+              let db = fbase.firestore();
+              let profileRef = db.collection("users").doc(doc.data().matchID);
+              profileRef.onSnapshot(doc => {
+                if (doc.exists) {
+                  console.log(doc.data())
+                  this.setState({ match: doc.data().name })
+                } else {
+                  "unable to get name of match";
+                }
+              });
+            }
+
+          }))
+          .catch(err => {
+            console.log(err);
+          });
+      } else {
         // doc.data() will be undefined in this case
         console.log("No such document!");
-    }
-    }).catch(function(error) {
-        console.log("Error getting document:", error);
+      }
     });
   }
-    
+
   constructor(props) {
     super(props);
     this.state = {
@@ -136,10 +152,10 @@ export default class LinksScreen extends Component {
       isDateTimePickerVisible: false,
       isDateTimePickerVisible2: false,
       locationPlaceID: null, //string - place_id
-      lunchStartDateTime: null, // datetime object - start 
+      lunchStartDateTime: null, // datetime object - start
       lunchEndDateTime: null, // datetime object - end
     };
-    this.lunchstartstring = "" // TEST start date time string 
+    this.lunchstartstring = "" // TEST start date time string
     this.lunchendstring = ""
     this.getRequest = this.getRequest.bind(this);
     this.getRequest();
@@ -155,7 +171,7 @@ export default class LinksScreen extends Component {
   submitEdits = () => {
     // Alert.alert(this.state.edits.location);
     // Alert.alert(this.state.edits.start);
-    console.log("ON SUBMIT: " +this.state.locationPlaceID); 
+    console.log("ON SUBMIT: " +this.state.locationPlaceID);
 
     let url = 'https://maps.googleapis.com/maps/api/place/details/json?';
     let place_id = "place_id=" + this.state.locationPlaceID;
@@ -180,11 +196,11 @@ export default class LinksScreen extends Component {
     this.setState({
       view: 'view',
     });
-    
+
     if (this.state.lunchStartDateTime != null || this.lunchEndDateTime != null) {
       if (this.state.lunchStartDateTime > this.state.lunchEndDateTime) {
         Alert.alert("End Time is before Start Time!");
-      }  else { 
+      }  else {
         var user = fbase.auth().currentUser;
         var db = fbase.firestore();
         var profileRef = db.collection("requests").doc(user.uid).update({
@@ -206,7 +222,7 @@ export default class LinksScreen extends Component {
         Alert.alert("Fields have been Updated")
       });
     }
-    
+
   }
 
   render() {
@@ -241,11 +257,19 @@ export default class LinksScreen extends Component {
                     subtitle={<Text style={styles.ratingText}>{this.state.matched ? "Yes" : "No"}</Text>}
                     bottomDivider
                   />
+                  {this.state.matched &&
+                    <ListItem
+                      key={4}
+                      title={<Text style={styles.boldText}>{"Match: "}</Text>}
+                      subtitle={<Text style={styles.ratingText}>{this.state.match}</Text>}
+                      bottomDivider
+                    />
+                  }
                   <View style={styles.fixToText}>
                     {!this.state.matched && <View><Button title="Edit" buttonStyle={styles.button} raised={true} onPress={() => this.setState({ view: "edit" })} /></View>}
                     <Button title="Flake" buttonStyle={styles.button} raised={true} onPress={this.flake} />
                   </View>
-                  
+
                 </View>
               }
 
@@ -261,7 +285,7 @@ export default class LinksScreen extends Component {
                       </Text>
                     }
                     subtitle={
-                      //TODO fix the double click 
+                      //TODO fix the double click
                       <View style={styles.times}>
                         <ScrollView>
                           <GooglePlacesAutocomplete
@@ -310,7 +334,7 @@ export default class LinksScreen extends Component {
                     }
                     bottomDivider
                   />
-                
+
                   <ListItem
                     key={1}
                     title={
@@ -386,7 +410,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     margin: 10
   },
-  subtitleFont: { 
+  subtitleFont: {
     fontWeight: "600",
   },
   main: {
