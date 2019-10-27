@@ -4,6 +4,7 @@ import { Button, Input, Image, ListItem, Text } from 'react-native-elements';
 import { WebBrowser } from 'expo';
 import { ExpoLinksView } from '@expo/samples';
 import { firebaseapp as fbase } from '../src/config';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import API from '../api.json';
 import { db } from '../src/config';
 import snek from '../assets/images/snake.jpg';
@@ -63,7 +64,7 @@ export default class LinksScreen extends Component {
         let key = "key=" + API["googlemaps"]
         let requestReverseGeoCode = url + place_id + "&" + fields + "&" + key
 
-        fetch("https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJx9EaGRoE9YgR7Je8EHoBBRo&fields=name,formatted_address&key=AIzaSyCwt1IlfjmH9cOk3FOLkMr4sORPsL5PT68", {
+        fetch(requestReverseGeoCode, {
           "method": "GET",
           "headers": {}
         })
@@ -192,7 +193,7 @@ export default class LinksScreen extends Component {
   }
 
   link = () => {
-    Linking.openURL('fb-messenger://user-id/heatwave23');
+    Linking.openURL('fb-messenger://user-thread/heatwave23');
   }
 
   render() {
@@ -231,7 +232,7 @@ export default class LinksScreen extends Component {
                     <ListItem
                       key={4}
                       title={<Text style={styles.boldText}>{"Match: "}</Text>}
-                      subtitle={<View style={styles.fixToTextBetween}><Text style={styles.ratingText}>{this.state.match}</Text><Text style={styles.ratingTextLink} onPress={this.link}>Click to Message</Text></View>}
+                      subtitle={<View style={styles.fixToTextBetween}><Text style={styles.ratingText}>{this.state.match}</Text><MaterialCommunityIcons name="facebook-messenger" size={32} color="#006AFF" onPress={this.link}/></View>}
                       bottomDivider
                     />
                   }
