@@ -147,13 +147,13 @@ export default class LinksScreen extends Component {
                   />
                   <ListItem
                     key={1}
-                    title={<Text style={styles.boldText}>{"Lunch start time:"}</Text>}
+                    title={<Text style={styles.boldText}>{"Start Time:"}</Text>}
                     subtitle={<Text style={styles.ratingText}>{this.state.start}</Text>}
                     bottomDivider
                   />
                   <ListItem
                     key={2}
-                    title={<Text style={styles.boldText}>{"Lunch end time:"}</Text>}
+                    title={<Text style={styles.boldText}>{"End Time:"}</Text>}
                     subtitle={<Text style={styles.ratingText}>{this.state.end}</Text>}
                     bottomDivider
                   />
