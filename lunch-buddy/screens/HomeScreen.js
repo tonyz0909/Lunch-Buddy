@@ -122,11 +122,18 @@ export default class HomeScreen extends Component {
           style={styles.container}
           contentContainerStyle={styles.contentContainer}>
           <View style={styles.inputs}>
-            <ListItem
+            <ListItem 
               key={0}
-              title={<Text style={styles.boldText}>{"Enter Location:"}</Text>}
+              title={
+                <Text style={styles.times}>
+                  <Text style={styles.boldText}>{"Enter Location:"}</Text>
+                </Text>
+              }
               subtitle={
                 //TODO fix the double click 
+                <View style={styles.times}>
+                <ScrollView>
+
                 <GooglePlacesAutocomplete
                   placeholder='Location Search'
                   minLength={2}
@@ -140,6 +147,22 @@ export default class HomeScreen extends Component {
                       console.log(data.place_id)
                       this.handleLocationPicked(data.place_id)
                     }}
+                  styles={{
+                    textInputContainer: {
+                      backgroundColor: 'rgba(0,0,0,0)',
+                      borderTopWidth: 0,
+                      borderBottomWidth: 1,
+                      borderColor: "black",
+                    },
+                    textInput: { 
+                      fontWeight: '400',
+                      fontSize: 18,
+                    },
+                    description: { 
+                      fontWeight: '200',
+                      fontSize: 14, //TODO side scrolling?
+                    }
+                  }}
                   getDefaultValue={() => ''}
                   query={{
                     // available options: https://developers.google.com/places/web-service/autocomplete
@@ -152,6 +175,8 @@ export default class HomeScreen extends Component {
                     rankby: 'distance',
                   }}
                 />
+                </ScrollView> 
+                </View>
               }
               bottomDivider
             />
@@ -208,10 +233,15 @@ export default class HomeScreen extends Component {
           {/* <Text style={styles.getStartedText}>
             This is a string: {this.state.locationPlaceID}
           </Text> */}
-
-
-          <View style={styles.fixToText}>
-            <Button title="Submit Request!" buttonStyle={styles.button} raised={true} onPress={this.submit} />
+          <View>
+          <ListItem
+            key={0}
+            title={
+              <View style={styles.fixToText}>
+                <Button title="Submit Request!" buttonStyle={styles.button} raised={true} onPress={this.submit} />
+              </View>
+            }
+          />
           </View>
         </ScrollView>
       </View>
@@ -285,6 +315,7 @@ const styles = StyleSheet.create({
   times: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    alignItems: 'flex-start',
     margin: 10
   },
   button: {
