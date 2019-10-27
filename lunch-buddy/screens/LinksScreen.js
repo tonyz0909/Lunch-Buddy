@@ -6,6 +6,7 @@ import { firebaseapp as fbase} from '../src/config';
 import API from '../api.json';
 import { db } from '../src/config';
 import DateTimePicker from "react-native-modal-datetime-picker";
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 
 function newUser(fName, lName, email, phoneNumber) {
@@ -58,6 +59,7 @@ export default class LinksScreen extends Component {
 
   handleLocationPicked = str => {
     this.setState({ locationPlaceID: str });
+    console.log(this.state.locationPlaceID); 
   }
 
   getRequest = () => {
@@ -86,8 +88,11 @@ export default class LinksScreen extends Component {
           let locationString = data.result.name + ", " + data.result.formatted_address 
           this.setState({
             location: locationString,
+            locationPlaceID: place_id,
             start: doc.data().startTime.toDate().toLocaleTimeString('en-US'),
+            lunchStartDateTime: doc.data().startTime.toDate(),
             end: doc.data().endTime.toDate().toLocaleTimeString('en-US'),
+            lunchEndDateTime: doc.data().endTime.toDate(), 
             matched: doc.data().matched,
             match: doc.data().matchID,
             edits: {
@@ -96,7 +101,6 @@ export default class LinksScreen extends Component {
               end: "1:30pm",
             }
           });
-
         }))
         .catch(err => {
           console.log(err); 
@@ -134,7 +138,6 @@ export default class LinksScreen extends Component {
       locationPlaceID: null, //string - place_id
       lunchStartDateTime: null, // datetime object - start 
       lunchEndDateTime: null, // datetime object - end
-      
     };
     this.lunchstartstring = "" // TEST start date time string 
     this.lunchendstring = ""
@@ -152,12 +155,50 @@ export default class LinksScreen extends Component {
   submitEdits = () => {
     // Alert.alert(this.state.edits.location);
     // Alert.alert(this.state.edits.start);
+    console.log("ON SUBMIT: " +this.state.locationPlaceID); 
+
+    let url = 'https://maps.googleapis.com/maps/api/place/details/json?';
+    let place_id = "place_id=" + this.state.locationPlaceID;
+
+    let fields = "fields=name,formatted_address"
+    let key = "key=" + API["googlemaps"]
+    let requestReverseGeoCode = url + place_id + "&" + fields + "&" + key
+    console.log("ON submit: " + requestReverseGeoCode);
+    fetch(requestReverseGeoCode, {
+      "method": "GET",
+      "headers": {}
+    })
+    .then(response => response.json())
+    .then((data => {
+      let locationString = data.result.name + ", " + data.result.formatted_address
+      this.setState({
+        location: locationString
+      })
+    }));
+
+
     this.setState({
       view: 'view',
-      location: this.state.edits.location,
-      start: this.state.edits.start,
-      end: this.state.edits.end,
+      // location: this.state.edits.location,
+      // start: this.state.edits.start,
+      // end: this.state.edits.end,
     });
+    
+    // if (this.state.lunchStartDateTime != null || this.lunchEndDateTime != null) {
+    //   if (this.state.lunchStartDateTime > this.state.lunchEndDateTime) {
+    //     Alert.alert("End Time is before Start Time!");
+    //   } 
+    // } 
+    var user = fbase.auth().currentUser;
+    var db = fbase.firestore();
+    var profileRef = db.collection("requests").doc(user.uid).update({
+      placeID: this.state.locationPlaceID,
+      startTime: this.state.lunchStartDateTime,
+      endTime: this.state.lunchEndDateTime,
+    }).then(function() {
+      Alert.alert("Fields have been Updated")
+    });
+    
   }
 
   render() {
@@ -205,14 +246,59 @@ export default class LinksScreen extends Component {
                   {/* TODO LATER  */}
                   <ListItem
                     key={0}
-                    title={<Text style={styles.boldText}>{"Location:"}</Text>}
+                    title={
+                      <Text style={styles.times}>
+                        <Text style={styles.boldText}>{"Enter Location:"}</Text>
+                      </Text>
+                    }
                     subtitle={
-                        <Input
-                        style={styles.subtitleFont}
-                        placeholder={this.state.location}
-                        onChangeText={text => this.setState({ edits: { ...this.state.edits, location: text } })} 
-                        />
-                      }
+                      //TODO fix the double click 
+                      <View style={styles.times}>
+                        <ScrollView>
+                          <GooglePlacesAutocomplete
+                            placeholder={this.state.location}
+                            minLength={2}
+                            autoFocus={false}
+                            returnKeyType={'search'}
+                            listViewDisplayed='true'
+                            fetchDetails={true}
+                            renderDescription={row => row.description}
+                            onPress={
+                              (data, details = null) => { // 'details' is provided when fetchDetails = true
+                                // console.log(data.place_id)
+                                this.handleLocationPicked(data.place_id)
+                              }}
+                            styles={{
+                              textInputContainer: {
+                                backgroundColor: 'rgba(0,0,0,0)',
+                                borderTopWidth: 0,
+                                borderBottomWidth: 1,
+                                borderColor: "black",
+                              },
+                              textInput: {
+                                fontWeight: '400',
+                                fontSize: 18,
+                              },
+                              description: {
+                                fontWeight: '200',
+                                fontSize: 14, //TODO side scrolling?
+                              }
+                            }}
+                            getDefaultValue={() => ''}
+                            query={{
+                              // available options: https://developers.google.com/places/web-service/autocomplete
+                              key: API["googlemaps"],
+                              language: 'en', // language of the results
+                            }}
+                            nearbyPlacesAPI='GooglePlacesSearch'
+                            GooglePlacesSearchQuery={{
+                              // available options for GooglePlacesSearch API : https://developers.google.com/places/web-service/search
+                              rankby: 'distance',
+                            }}
+                          />
+                        </ScrollView>
+                      </View>
+                    }
                     bottomDivider
                   />
                   {/* render the pens  */}
