@@ -48,32 +48,46 @@ export default class LinksScreen extends Component {
           "method": "GET",
           "headers": {}
         })
-        .then(response => response.json())
-        .then((data => {
-          // console.log("fetch response: " + JSON.stringify(data));
-          let locationString = data.result.name + ", " + data.result.formatted_address
-          this.setState({
-            location: locationString,
-            start: doc.data().startTime.toDate().toLocaleTimeString('en-US'),
-            end: doc.data().endTime.toDate().toLocaleTimeString('en-US'),
-            matched: doc.data().matched,
-            match: doc.data().matchID,
-            edits: {
-              location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
-              start: "11:30am",
-              end: "1:30pm",
-            }
-          });
+          .then(response => response.json())
+          .then((data => {
+            // console.log("fetch response: " + JSON.stringify(data));
+            let locationString = data.result.name + ", " + data.result.formatted_address
+            this.setState({
+              location: locationString,
+              start: doc.data().startTime.toDate().toLocaleTimeString('en-US'),
+              end: doc.data().endTime.toDate().toLocaleTimeString('en-US'),
+              matched: doc.data().matched,
+              match: doc.data().matchID,
+              edits: {
+                location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
+                start: "11:30am",
+                end: "1:30pm",
+              }
+            });
 
-        }))
-        .catch(err => {
-          console.log(err);
-        });
+            // query for name of matched person
+            if (doc.data().matched) {
+              let db = fbase.firestore();
+              let profileRef = db.collection("users").doc(doc.data().matchID);
+              profileRef.onSnapshot(doc => {
+                if (doc.exists) {
+                  console.log(doc.data())
+                  this.setState({ match: doc.data().name })
+                } else {
+                  "unable to get name of match";
+                }
+              });
+            }
+
+          }))
+          .catch(err => {
+            console.log(err);
+          });
       } else {
         // doc.data() will be undefined in this case
         console.log("No such document!");
       }
-    })
+    });
   }
 
   constructor(props) {
@@ -158,6 +172,14 @@ export default class LinksScreen extends Component {
                     subtitle={<Text style={styles.ratingText}>{this.state.matched ? "Yes" : "No"}</Text>}
                     bottomDivider
                   />
+                  {this.state.matched &&
+                    <ListItem
+                      key={4}
+                      title={<Text style={styles.boldText}>{"Match: "}</Text>}
+                      subtitle={<Text style={styles.ratingText}>{this.state.match}</Text>}
+                      bottomDivider
+                    />
+                  }
                   <View style={styles.fixToText}>
                     <Button title="Edit" buttonStyle={styles.button} raised={true} onPress={() => this.setState({ view: "edit" })} />
                     <Button title="Flake" buttonStyle={styles.button} raised={true} onPress={this.flake} />
@@ -170,12 +192,12 @@ export default class LinksScreen extends Component {
                     key={0}
                     title={<Text style={styles.boldText}>{"Location:"}</Text>}
                     subtitle={
-                        <Input
+                      <Input
                         style={styles.subtitleFont}
                         placeholder={this.state.location}
                         onChangeText={text => this.setState({ edits: { ...this.state.edits, location: text } })}
-                        />
-                      }
+                      />
+                    }
                     bottomDivider
                   />
                   <ListItem
@@ -183,10 +205,10 @@ export default class LinksScreen extends Component {
                     title={<Text style={styles.boldText}>{"Lunch start time:"}</Text>}
                     subtitle={
                       <Input
-                      placeholder={this.state.start}
-                      onChangeText={text => this.setState({ edits: { ...this.state.edits, start: text } })} />
+                        placeholder={this.state.start}
+                        onChangeText={text => this.setState({ edits: { ...this.state.edits, start: text } })} />
 
-                      }
+                    }
                     bottomDivider
                   />
                   <ListItem
