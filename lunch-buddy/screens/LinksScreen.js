@@ -126,25 +126,22 @@ export default class LinksScreen extends Component {
 
 
 
-            // query for name of matched person
-            if (doc.data().matched) {
-              let db = fbase.firestore();
-              let profileRef = db.collection("users").doc(doc.data().matchID);
-              profileRef.onSnapshot(doc => {
-                if (doc.exists) {
-                  console.log(doc.data())
-                  this.setState({ match: doc.data().name })
-                } else {
-                  "unable to get name of match";
-                }
-              });
+        // query for name of matched person
+        if (doc.data().matched) {
+          let db = fbase.firestore();
+          let profileRef = db.collection("users").doc(doc.data().matchID);
+          profileRef.onSnapshot(doc => {
+            if (doc.exists) {
+              console.log(doc.data())
+              this.setState({ match: doc.data().name })
+            } else {
+              "unable to get name of match";
             }
-
-          }))
-          .catch(err => {
-            console.log(err);
           });
-      } else {
+        }
+
+
+       else {
         // doc.data() will be undefined in this case
         console.log("No such document!");
       }
