@@ -67,7 +67,8 @@ export default class HomeScreen extends Component {
     let db = fbase.firestore();
     let profileRef = db.collection("requests").doc(user.uid);
     let matchID = await this.searchForMatch(this.state.lunchStartDateTime, this.state.lunchEndDateTime, this.state.locationPlaceID, user.uid);
-    let matched = this.matchID !== null;
+    let matched = matchID !== null;
+    console.log("matched: " + matched)
     profileRef.set({
       userID: user.uid,
       startTime: this.state.lunchStartDateTime,
@@ -96,6 +97,7 @@ export default class HomeScreen extends Component {
           data = doc.data()
           console.log(doc.id, " => ", data);
           if (data.placeID === locationID) {
+            console.log("location matched!");
             if ((end.getTime() - data.startTime.seconds) / 60 >= 30
               || (data.endTime.seconds - start.getTime()) / 60 >= 30) {
               console.log("matched!")
