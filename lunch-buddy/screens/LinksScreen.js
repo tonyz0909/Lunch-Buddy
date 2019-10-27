@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Input, Image, ListItem, Text } from 'react-native-elements';
+import { WebBrowser } from 'expo';
 import { ExpoLinksView } from '@expo/samples';
 import { firebaseapp as fbase } from '../src/config';
 import API from '../api.json';
@@ -190,6 +191,10 @@ export default class LinksScreen extends Component {
     });
   }
 
+  link = () => {
+    Linking.openURL('fb-messenger://user-id/heatwave23');
+  }
+
   render() {
     return (
       <ScrollView style={styles.container}>
@@ -226,7 +231,7 @@ export default class LinksScreen extends Component {
                     <ListItem
                       key={4}
                       title={<Text style={styles.boldText}>{"Match: "}</Text>}
-                      subtitle={<Text style={styles.ratingText}>{this.state.match}</Text>}
+                      subtitle={<View style={styles.fixToTextBetween}><Text style={styles.ratingText}>{this.state.match}</Text><Text style={styles.ratingTextLink} onPress={this.link}>Click to Message</Text></View>}
                       bottomDivider
                     />
                   }
@@ -362,8 +367,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     margin: 10
   },
+  fixToTextBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   ratingText: {
     fontSize: 18,
     color: 'grey'
+  },
+  ratingTextLink: {
+    fontSize: 18,
+    color: '#0066ff'
   }
 });
