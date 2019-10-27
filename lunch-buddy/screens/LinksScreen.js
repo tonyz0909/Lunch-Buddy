@@ -6,27 +6,6 @@ import { firebaseapp as fbase } from '../src/config';
 import API from '../api.json';
 import { db } from '../src/config';
 
-function newUser(fName, lName, email, phoneNumber) {
-  db.ref('/users').push({
-    fName,
-    lName,
-    email,
-    phoneNumber
-  }).then((data) => {
-    //success callback
-    console.log('data', data)
-  }).catch((error) => {
-    //error callback
-    console.log('error ', error)
-  })
-}
-
-let addItem = item => {
-  db.ref('/items').push({
-    name: item
-  });
-}
-
 export default class LinksScreen extends Component {
   getRequest = () => {
     var user = fbase.auth().currentUser;
@@ -50,9 +29,19 @@ export default class LinksScreen extends Component {
         });
       } else {
         // doc.data() will be undefined in this case
-        console.log("No such document!");
+        console.log("No Request!");
+        var profile = db.collection("users").doc(user.uid);
+        profile.onSnapshot(doc => {
+          console.log("checking flakiness");
+          if (doc.exists) {
+            console.log("Flake status:", doc.data().flakeToday.toString());
+            this.setState({
+              flakeToday: doc.data().flakeToday.toString()
+            });
+          }
+        });
       }
-    })
+    });
   }
 
   getFlake = () => {
@@ -76,8 +65,9 @@ export default class LinksScreen extends Component {
       flakeToday: true
     });
     Alert.alert('You flaker :(');
+    this.setState({ flakeToday: true })
     db.collection("requests").doc(user.uid).delete().then(function() {
-      console.log("Document successfully deleted!");
+      console.log("Request successfully deleted!");
     }).catch(function(error) {
       console.error("Error removing document: ", error);
     });
@@ -86,21 +76,9 @@ export default class LinksScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      // titleText: "Your Requests",
-      // view: "view",
-      // location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
-      // start: "11:30am",
-      // end: "1:30pm",
-      // matched: false,
-      // match: null,
-      // edits: {
-      //   location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
-      //   start: "11:30am",
-      //   end: "1:30pm",
-      // }
       titleText: 'Your Request',
       view: 'view',
-      location: '',
+      location: null,
       start: '',
       end: '',
       matched: false,
@@ -114,8 +92,8 @@ export default class LinksScreen extends Component {
     };
     this.getRequest = this.getRequest.bind(this);
     this.getRequest();
-    this.getFlake = this.getRequest.bind(this);
-    this.getFlake();
+    //this.getFlake = this.getRequest.bind(this);
+    //this.getFlake();
   }
 
   flake = () => {
@@ -137,6 +115,7 @@ export default class LinksScreen extends Component {
   }
 
   render() {
+    console.log(this.state.location);
     return (
       <ScrollView style={styles.container}>
         {
@@ -223,38 +202,6 @@ export default class LinksScreen extends Component {
 LinksScreen.navigationOptions = {
   title: 'Your Lunch Requests',
 };
-
-// export default class LinksScreen extends Component {
-//   state = {
-//     name: ''
-//   };
-
-//   handleChange = e => {
-//     this.setState({
-//       name: e.nativeEvent.text
-//     });
-//   };
-//   handleSubmit = () => {
-//     addItem(this.state.name);
-//     AlertIOS.alert('Item saved successfully');
-//   };
-
-//   render() {
-//     return (
-//       <View style={styles.main}>
-//         <Text style={styles.title}>Add Item</Text>
-//         <TextInput style={styles.itemInput} onChange={this.handleChange} />
-//         <TouchableHighlight
-//           style={styles.button}
-//           underlayColor="white"
-//           onPress={this.handleSubmit}
-//         >
-//           <Text style={styles.buttonText}>Add</Text>
-//         </TouchableHighlight>
-//       </View>
-//     );
-//   }
-// }
 
 const styles = StyleSheet.create({
   main: {
