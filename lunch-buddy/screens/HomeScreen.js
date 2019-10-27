@@ -96,6 +96,18 @@ export default class HomeScreen extends Component {
       matched,
       matchID: matchID
     }, { merge: true });
+    
+    var userRef = fbase.firestore().collection("users").doc(matchID);
+    userRef.get().then((doc) => {
+      if (doc.exists) {
+        var data = doc.data();
+        this.sendPushNotification(data.pushToken.token);
+      } else {
+          console.log("No such document!");
+      }
+    }).catch(function(error) {
+      console.log("Error getting document:", error);
+    });
   }
 
   makeMatch = (newRequestUID, existingRequestUID) => {
@@ -200,8 +212,8 @@ export default class HomeScreen extends Component {
       body: JSON.stringify({
         to: {pushToken},
         sound: 'default',
-        title: 'Demo',
-        body: 'Demo notificaiton'
+        title: 'Match Found!',
+        body: 'Congrats! Open the app to find your lunch buddy.'
       })
     });
   };
