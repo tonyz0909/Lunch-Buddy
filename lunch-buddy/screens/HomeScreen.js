@@ -97,11 +97,12 @@ export default class HomeScreen extends Component {
       matchID: matchID
     }, { merge: true });
     
-    var userRef = fbase.firestore().collection("users").doc(matchID);
+    var userRef = fbase.firestore().collection('users').doc(matchID);
     userRef.get().then((doc) => {
       if (doc.exists) {
         var data = doc.data();
-        this.sendPushNotification(data.pushToken.token);
+        console.log("data: " + data)
+        this.sendPushNotification(data.notificationToken);
       } else {
           console.log("No such document!");
       }
@@ -196,13 +197,22 @@ export default class HomeScreen extends Component {
     let token = await Notifications.getExpoPushTokenAsync();
   
     // POST the token to your backend server from where you can retrieve it to send push notifications.
-    var profileRef = fbase.firestore().collection("users").doc(this.currentUser.uid);
-    var setWithMerge = profileRef.set({
-      pushToken : {token}
-    }, { merge: true });
+    // var profileRef = fbase.firestore().collection("users").doc(this.currentUser.uid);
+    // var setWithMerge = profileRef.set({
+    //   pushToken : {token}
+    // }, { merge: true });
+
+    fbase
+      .firestore()
+      .collection('users')
+      .doc(this.currentUser.uid)
+      .set({
+        pushToken: token,
+      }, { merge: true });
   }
 
   sendPushNotification = (pushToken) => {
+    console.log("sending notif to " + pushToken);
     let response = fetch('https://exp.host/--/api/v2/push/send', {
       method: 'POST',
       headers: {
@@ -220,6 +230,7 @@ export default class HomeScreen extends Component {
 
   async componentDidMount() {
     this.currentUser = fbase.auth().currentUser;
+    console.log(this.currentUser);
     await this.registerForPushNotificationsAsync();
   }
 
