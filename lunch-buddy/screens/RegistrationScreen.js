@@ -47,7 +47,8 @@ export default class LoginScreen extends Component {
     var profileRef = db.collection("users").doc(user.uid);
         var setWithMerge = profileRef.set({
             phoneNumber: this.state.phoneNumber,
-            email: this.state.email
+            email: this.state.email,
+            flakeToday: false
         }, { merge: true });
     this.props.navigation.navigate('Main')
   }

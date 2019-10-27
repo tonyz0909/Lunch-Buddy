@@ -55,6 +55,34 @@ export default class LinksScreen extends Component {
         console.log("Error getting document:", error);
     });
   }
+
+  getFlake = () => {
+    var user = fbase.auth().currentUser;
+    var db = fbase.firestore();
+    var profileRef = db.collection("users").doc(user.uid);
+    profileRef.get().then(doc => {
+      if (doc.exists) {
+        console.log("Document data:", doc.data().flakeToday.toString());
+        this.setState({
+          flakeToday: doc.data().flakeToday.toString()
+        });
+      }
+    });
+  }
+  setFlake = () => {
+    var user = fbase.auth().currentUser;
+    var db = fbase.firestore();
+    var profileRef = db.collection("users").doc(user.uid);
+    profileRef.set({
+      flakeToday: true
+    });
+    Alert.alert('You flaker :(');
+    db.collection("requests").doc(user.uid).delete().then(function() {
+      console.log("Document successfully deleted!");
+    }).catch(function(error) {
+      console.error("Error removing document: ", error);
+    });
+  }
     
   constructor(props) {
     super(props);
@@ -71,9 +99,9 @@ export default class LinksScreen extends Component {
       //   start: "11:30am",
       //   end: "1:30pm",
       // }
-      titleText: '',
+      titleText: 'Your Request',
       view: 'view',
-      location: 'Testing testing',
+      location: '',
       start: '',
       end: '',
       matched: false,
@@ -82,10 +110,13 @@ export default class LinksScreen extends Component {
         location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
         start: "11:30am",
         end: "1:30pm",
-      }
+      },
+      flakeToday: false
     };
     this.getRequest = this.getRequest.bind(this);
     this.getRequest();
+    this.getFlake = this.getRequest.bind(this);
+    this.getFlake();
   }
 
   flake = () => {
@@ -110,7 +141,7 @@ export default class LinksScreen extends Component {
     return (
       <ScrollView style={styles.container}>
         {
-          this.state.location ?
+          !this.state.flakeToday ?
             <View>
               {this.state.view === 'view' &&
                 <View>
@@ -140,7 +171,7 @@ export default class LinksScreen extends Component {
                   />
                   <View style={styles.fixToText}>
                     <Button title="Edit" buttonStyle={styles.button} raised={true} onPress={() => this.setState({ view: "edit" })} />
-                    <Button title="Flake" buttonStyle={styles.button} raised={true} onPress={this.flake} />
+                    <Button title="Flake" buttonStyle={styles.button} raised={true} onPress={this.setFlake} />
                   </View>
                 </View>
               }
