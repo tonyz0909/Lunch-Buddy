@@ -83,7 +83,6 @@ export default class HomeScreen extends Component {
 
   handleSubmit = async () => {
     let user = fbase.auth().currentUser;
-    // console.log(user);
     let db = fbase.firestore();
     let profileRef = db.collection("requests").doc(user.uid);
     let matchID = await this.searchForMatch(this.state.lunchStartDateTime, this.state.lunchEndDateTime, this.state.locationPlaceID, user.uid);
@@ -96,19 +95,6 @@ export default class HomeScreen extends Component {
       matched,
       matchID: matchID
     }, { merge: true });
-    
-    var userRef = fbase.firestore().collection('users').doc(matchID);
-    userRef.get().then((doc) => {
-      if (doc.exists) {
-        var data = doc.data();
-        console.log("data: " + data)
-        this.sendPushNotification(data.notificationToken);
-      } else {
-          console.log("No such document!");
-      }
-    }).catch(function(error) {
-      console.log("Error getting document:", error);
-    });
   }
 
   makeMatch = (newRequestUID, existingRequestUID) => {
@@ -128,7 +114,6 @@ export default class HomeScreen extends Component {
           // doc.data() is never undefined for query doc snapshots
           data = doc.data()
           console.log(doc.id, " => ", data);
-          console.log(data.placeID);
           if (data.placeID === locationID) {
             if ((end.getTime() - data.startTime.seconds) / 60 >= 30
               || (data.endTime.seconds - start.getTime()) / 60 >= 30) {
@@ -138,6 +123,17 @@ export default class HomeScreen extends Component {
                 matched: true,
                 matchID: userID
               })
+
+              db.collection("users").doc(data.userID).get().then((doc) => {
+                if (doc.exists) {
+                  // var data = doc.data();
+                  sendPushNotification(doc.data().pushToken.token);
+                } else {
+                    console.log("No such document!");
+                }
+              }).catch(function(error) {
+                console.log("Error getting document:", error);
+              });
               return resolve(data.userID);
             }
           }
@@ -207,30 +203,12 @@ export default class HomeScreen extends Component {
       .collection('users')
       .doc(this.currentUser.uid)
       .set({
-        pushToken: token,
+        pushToken: {token},
       }, { merge: true });
   }
 
-  sendPushNotification = (pushToken) => {
-    console.log("sending notif to " + pushToken);
-    let response = fetch('https://exp.host/--/api/v2/push/send', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        to: {pushToken},
-        sound: 'default',
-        title: 'Match Found!',
-        body: 'Congrats! Open the app to find your lunch buddy.'
-      })
-    });
-  };
-
   async componentDidMount() {
     this.currentUser = fbase.auth().currentUser;
-    console.log(this.currentUser);
     await this.registerForPushNotificationsAsync();
   }
 
@@ -396,6 +374,23 @@ function DevelopmentModeNotice() {
     );
   }
 }
+
+function sendPushNotification(pushToken) {
+  console.log("RECEIVING PUSH TOKEN " + pushToken);
+  fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      to: pushToken.toString(),
+      sound: 'default',
+      title: 'Match Found!',
+      body: 'Congrats! Open the app to find your lunch buddy.'
+    })
+  });
+};
 
 HomeScreen.navigationOptions = {
   title: "Create Request",
