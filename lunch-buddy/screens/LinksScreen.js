@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View, StatusBar } from 'react-native';
 import { Button, Input, ListItem, Text } from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
 import { firebaseapp as fbase} from '../src/config';
@@ -174,17 +174,24 @@ export default class LinksScreen extends Component {
                   <ListItem
                     key={0}
                     title={<Text style={styles.boldText}>{"Location:"}</Text>}
-                    subtitle={<Input
-                      placeholder={this.state.location}
-                      onChangeText={text => this.setState({ edits: { ...this.state.edits, location: text } })} />}
+                    subtitle={
+                        <Input
+                        style={styles.subtitleFont}
+                        placeholder={this.state.location}
+                        onChangeText={text => this.setState({ edits: { ...this.state.edits, location: text } })} 
+                        />
+                      }
                     bottomDivider
                   />
                   <ListItem
                     key={1}
                     title={<Text style={styles.boldText}>{"Lunch start time:"}</Text>}
-                    subtitle={<Input
+                    subtitle={
+                      <Input
                       placeholder={this.state.start}
-                      onChangeText={text => this.setState({ edits: { ...this.state.edits, start: text } })} />}
+                      onChangeText={text => this.setState({ edits: { ...this.state.edits, start: text } })} />
+                      
+                      }
                     bottomDivider
                   />
                   <ListItem
@@ -252,6 +259,9 @@ LinksScreen.navigationOptions = {
 // }
 
 const styles = StyleSheet.create({
+  subtitleFont: { 
+    fontWeight: "600",
+  },
   main: {
     flex: 1,
     paddingTop: 15,

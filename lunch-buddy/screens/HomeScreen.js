@@ -132,6 +132,8 @@ export default class HomeScreen extends Component {
               subtitle={
                 //TODO fix the double click 
                 <View style={styles.times}>
+                <ScrollView>
+
                 <GooglePlacesAutocomplete
                   placeholder='Location Search'
                   minLength={2}
@@ -154,9 +156,11 @@ export default class HomeScreen extends Component {
                     },
                     textInput: { 
                       fontWeight: '400',
+                      fontSize: 18,
                     },
                     description: { 
                       fontWeight: '200',
+                      fontSize: 14, //TODO side scrolling?
                     }
                   }}
                   getDefaultValue={() => ''}
@@ -171,6 +175,7 @@ export default class HomeScreen extends Component {
                     rankby: 'distance',
                   }}
                 />
+                </ScrollView> 
                 </View>
               }
               bottomDivider
