@@ -157,14 +157,26 @@ export default class LinksScreen extends Component {
       flakeToday: true
     });
 
+    // delete 'matchID' from matched person
+    db.collection("requests").doc(user.uid).get().then(doc => {
+      if (doc.exists) {
+        matchID = doc.data().matchID;
+        db.collection("requests").doc(matchID).set({
+          matched: false,
+          matchID: ''
+        }, { merge: true });
+      } else {
+        console.log("match's request doc not found");
+      }
+      console.log("Request successfully deleted!");
+    });
+
     // delete request
     db.collection("requests").doc(user.uid).delete().then(function () {
       console.log("Request successfully deleted!");
     }).catch(function (error) {
       console.error("Error removing document: ", error);
     });
-
-    // TODO: delete 'matchID' from matched person
   }
 
   submitEdits = () => {
