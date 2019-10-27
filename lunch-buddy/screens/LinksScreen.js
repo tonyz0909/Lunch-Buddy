@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Input, ListItem, Text } from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
-import { firebaseapp as fbase} from '../src/config';
+import { firebaseapp as fbase } from '../src/config';
 import API from '../api.json';
 import { db } from '../src/config';
 
@@ -14,7 +14,7 @@ function newUser(fName, lName, email, phoneNumber) {
     phoneNumber
   }).then((data) => {
     //success callback
-    console.log('data' , data)
+    console.log('data', data)
   }).catch((error) => {
     //error callback
     console.log('error ', error)
@@ -29,10 +29,11 @@ let addItem = item => {
 
 export default class LinksScreen extends Component {
   getRequest = () => {
-    var user = fbase.auth().currentUser; 
+    var user = fbase.auth().currentUser;
     var db = fbase.firestore();
     var profileRef = db.collection("requests").doc(user.uid);
-    profileRef.get().then(doc => {
+    profileRef.onSnapshot(doc => {
+      console.log('updated snapshot');
       if (doc.exists) {
         console.log("Document data:", doc.data());
         this.setState({
@@ -47,13 +48,11 @@ export default class LinksScreen extends Component {
             end: "1:30pm",
           }
         });
-    } else {
+      } else {
         // doc.data() will be undefined in this case
         console.log("No such document!");
-    }
-    }).catch(function(error) {
-        console.log("Error getting document:", error);
-    });
+      }
+    })
   }
 
   getFlake = () => {
@@ -73,7 +72,7 @@ export default class LinksScreen extends Component {
     var user = fbase.auth().currentUser;
     var db = fbase.firestore();
     var profileRef = db.collection("users").doc(user.uid);
-    profileRef.set({
+    profileRef.update({
       flakeToday: true
     });
     Alert.alert('You flaker :(');
