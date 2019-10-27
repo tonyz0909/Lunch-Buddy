@@ -15,7 +15,7 @@ import { MonoText } from '../components/StyledText';
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import API from '../api.json';
-import { firebaseapp as fbase} from '../src/config';
+import { firebaseapp as fbase } from '../src/config';
 
 //real time database 
 // function newRequest(placeID, startTime, endTime) {
@@ -78,19 +78,61 @@ export default class HomeScreen extends Component {
     this.setState({ locationPlaceID: str });
   }
 
-  handleSubmit= () => {
-    var user = fbase.auth().currentUser; 
-    console.log(user);
-    var db = fbase.firestore();
-    var profileRef = db.collection("requests").doc(user.uid);
+  handleSubmit = async () => {
+    let user = fbase.auth().currentUser;
+    // console.log(user);
+    let db = fbase.firestore();
+    let profileRef = db.collection("requests").doc(user.uid);
+    let matchID = await this.searchForMatch(this.state.lunchStartDateTime, this.state.lunchEndDateTime, this.state.locationPlaceID, user.uid);
+    let matched = this.matchID !== null;
     profileRef.set({
       userID: user.uid,
       startTime: this.state.lunchStartDateTime,
       endTime: this.state.lunchEndDateTime,
       placeID: this.state.locationPlaceID,
-      matched: false,
-      matchID: ''
-    }, { merge: true});
+      matched,
+      matchID: matchID
+    }, { merge: true });
+  }
+
+  makeMatch = (newRequestUID, existingRequestUID) => {
+    let profileRef = db.collection("requests").doc(existingRequestUID);
+    return profileRef.update({
+      matched: true,
+      matchID: newRequestUID
+    });
+  }
+
+  searchForMatch = async (start, end, locationID, userID) => {
+    return new Promise((resolve, reject) => {
+      let db = fbase.firestore();
+      let requestsRef = db.collection("requests")
+      requestsRef.get().then((querySnapshot) => {
+        querySnapshot.forEach(function (doc) {
+          // doc.data() is never undefined for query doc snapshots
+          data = doc.data()
+          console.log(doc.id, " => ", data);
+          console.log(data.placeID);
+          if (data.placeID === locationID) {
+            if ((end.getTime() - data.startTime.seconds) / 60 >= 30
+              || (data.endTime.seconds - start.getTime()) / 60 >= 30) {
+              console.log("matched!")
+              let profileRef = db.collection("requests").doc(data.userID);
+              profileRef.update({
+                matched: true,
+                matchID: userID
+              })
+              return resolve(data.userID);
+            }
+          }
+        });
+        window.setTimeout(() => resolve(null), 5000);
+      })
+        .catch(function (error) {
+          console.log("Error getting documents: ", error);
+          reject();
+        });
+    })
   }
 
   submit = () => {
@@ -100,13 +142,13 @@ export default class HomeScreen extends Component {
       if (this.state.lunchStartDateTime > this.state.lunchEndDateTime) {
         Alert.alert("End Time is before Start Time!");
       } else {
-    //debug purposes 
-        let request = { 
+        //debug purposes 
+        let request = {
           location: this.state.locationPlaceID,
           startTime: this.state.lunchStartDateTime,
           endTime: this.state.lunchEndDateTime,
         }
-        console.log(request); 
+        // console.log(request);
         //firebase entry
         this.handleSubmit();
         Alert.alert("request saved");
@@ -137,7 +179,7 @@ export default class HomeScreen extends Component {
                   renderDescription={row => row.description}
                   onPress={
                     (data, details = null) => { // 'details' is provided when fetchDetails = true
-                      console.log(data.place_id)
+                      // console.log(data.place_id)
                       this.handleLocationPicked(data.place_id)
                     }}
                   getDefaultValue={() => ''}

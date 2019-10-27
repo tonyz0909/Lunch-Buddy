@@ -29,9 +29,9 @@ let addItem = item => {
 
 export default class LinksScreen extends Component {
   getRequest = () => {
-    var user = fbase.auth().currentUser;
-    var db = fbase.firestore();
-    var profileRef = db.collection("requests").doc(user.uid);
+    let user = fbase.auth().currentUser;
+    let db = fbase.firestore();
+    let profileRef = db.collection("requests").doc(user.uid);
     profileRef.onSnapshot(doc => {
       console.log('updated snapshot');
       if (doc.exists) {
