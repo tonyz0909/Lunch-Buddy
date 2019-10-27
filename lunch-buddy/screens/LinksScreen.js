@@ -74,8 +74,8 @@ export default class LinksScreen extends Component {
         let fields = "fields=name,formatted_address"
         let key = "key=" + API["googlemaps"]
         let requestReverseGeoCode = url + place_id + "&" + fields + "&" + key
-
-        fetch("https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJx9EaGRoE9YgR7Je8EHoBBRo&fields=name,formatted_address&key=AIzaSyCwt1IlfjmH9cOk3FOLkMr4sORPsL5PT68", {
+        console.log(requestReverseGeoCode); 
+        fetch(requestReverseGeoCode, {
           "method": "GET",
           "headers": {}
         })
