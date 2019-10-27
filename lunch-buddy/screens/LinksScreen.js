@@ -34,7 +34,7 @@ export default class LinksScreen extends Component {
     var profileRef = db.collection("requests").doc(user.uid);
     profileRef.get().then(doc => {
       if (doc.exists) {
-        console.log("Document data:", doc.data());
+        // console.log("Document data:", doc.data());
         // console.log("Start Time:", doc.data().startTime.toDate().toLocaleTimeString('en-US'))
         
         let url = 'https://maps.googleapis.com/maps/api/place/details/json?';
@@ -49,7 +49,7 @@ export default class LinksScreen extends Component {
         })
         .then(response => response.json())
         .then((data => {
-          console.log("fetch response: " + JSON.stringify(data)); 
+          // console.log("fetch response: " + JSON.stringify(data)); 
           let locationString = data.result.name + ", " + data.result.formatted_address 
           this.setState({
             location: locationString,
