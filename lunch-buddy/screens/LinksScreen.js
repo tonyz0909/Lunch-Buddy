@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Alert, ScrollView, StyleSheet, View, StatusBar } from 'react-native';
 import { Button, Input, ListItem, Text } from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
-import { firebaseapp as fbase} from '../src/config';
+import { firebaseapp as fbase } from '../src/config';
 import API from '../api.json';
 import { db } from '../src/config';
 
@@ -14,7 +14,7 @@ function newUser(fName, lName, email, phoneNumber) {
     phoneNumber
   }).then((data) => {
     //success callback
-    console.log('data' , data)
+    console.log('data', data)
   }).catch((error) => {
     //error callback
     console.log('error ', error)
@@ -29,14 +29,15 @@ let addItem = item => {
 
 export default class LinksScreen extends Component {
   getRequest = () => {
-    var user = fbase.auth().currentUser; 
-    var db = fbase.firestore();
-    var profileRef = db.collection("requests").doc(user.uid);
-    profileRef.get().then(doc => {
+    let user = fbase.auth().currentUser;
+    let db = fbase.firestore();
+    let profileRef = db.collection("requests").doc(user.uid);
+    profileRef.onSnapshot(doc => {
+      console.log('updated snapshot');
       if (doc.exists) {
         // console.log("Document data:", doc.data());
         // console.log("Start Time:", doc.data().startTime.toDate().toLocaleTimeString('en-US'))
-        
+
         let url = 'https://maps.googleapis.com/maps/api/place/details/json?';
         let place_id = "place_id=" + doc.data().placeID.toString();
         let fields = "fields=name,formatted_address"
@@ -49,8 +50,8 @@ export default class LinksScreen extends Component {
         })
         .then(response => response.json())
         .then((data => {
-          // console.log("fetch response: " + JSON.stringify(data)); 
-          let locationString = data.result.name + ", " + data.result.formatted_address 
+          // console.log("fetch response: " + JSON.stringify(data));
+          let locationString = data.result.name + ", " + data.result.formatted_address
           this.setState({
             location: locationString,
             start: doc.data().startTime.toDate().toLocaleTimeString('en-US'),
@@ -66,21 +67,15 @@ export default class LinksScreen extends Component {
 
         }))
         .catch(err => {
-          console.log(err); 
+          console.log(err);
         });
-
-        
-
-
-    } else {
+      } else {
         // doc.data() will be undefined in this case
         console.log("No such document!");
-    }
-    }).catch(function(error) {
-        console.log("Error getting document:", error);
-    });
+      }
+    })
   }
-    
+
   constructor(props) {
     super(props);
     this.state = {
@@ -178,7 +173,7 @@ export default class LinksScreen extends Component {
                         <Input
                         style={styles.subtitleFont}
                         placeholder={this.state.location}
-                        onChangeText={text => this.setState({ edits: { ...this.state.edits, location: text } })} 
+                        onChangeText={text => this.setState({ edits: { ...this.state.edits, location: text } })}
                         />
                       }
                     bottomDivider
@@ -190,7 +185,7 @@ export default class LinksScreen extends Component {
                       <Input
                       placeholder={this.state.start}
                       onChangeText={text => this.setState({ edits: { ...this.state.edits, start: text } })} />
-                      
+
                       }
                     bottomDivider
                   />
@@ -259,7 +254,7 @@ LinksScreen.navigationOptions = {
 // }
 
 const styles = StyleSheet.create({
-  subtitleFont: { 
+  subtitleFont: {
     fontWeight: "600",
   },
   main: {
