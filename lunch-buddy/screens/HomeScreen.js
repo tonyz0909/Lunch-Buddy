@@ -20,25 +20,6 @@ import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
 import { Notifications } from 'expo';
 
-//real time database
-// function newRequest(placeID, startTime, endTime) {
-//   matched = false;
-//   db.ref('/requests').push({
-//     //userID,
-//     start,
-//     end,
-//     placeID,
-//     matched,
-//     //matchID
-//   }).then((data) => {
-//     //success callback
-//     console.log('data' , data)
-//   }).catch((error) => {
-//     //error callback
-//     console.log('error ', error)
-//   })
-// }
-
 export default class HomeScreen extends Component {
   constructor(props) {
     super(props);
@@ -126,7 +107,6 @@ export default class HomeScreen extends Component {
 
               db.collection("users").doc(data.userID).get().then((doc) => {
                 if (doc.exists) {
-                  // var data = doc.data();
                   sendPushNotification(doc.data().pushToken.token);
                 } else {
                     console.log("No such document!");
@@ -193,11 +173,6 @@ export default class HomeScreen extends Component {
     let token = await Notifications.getExpoPushTokenAsync();
   
     // POST the token to your backend server from where you can retrieve it to send push notifications.
-    // var profileRef = fbase.firestore().collection("users").doc(this.currentUser.uid);
-    // var setWithMerge = profileRef.set({
-    //   pushToken : {token}
-    // }, { merge: true });
-
     fbase
       .firestore()
       .collection('users')
@@ -322,14 +297,6 @@ export default class HomeScreen extends Component {
               bottomDivider
             />
           </View>
-
-          {/* Test stuff */}
-          {/* <Text style={styles.getStartedText}>
-            {this.lunchstartstring}
-          </Text> */}
-          {/* <Text style={styles.getStartedText}>
-            This is a string: {this.state.locationPlaceID}
-          </Text> */}
           <View>
             <ListItem
               key={0}
@@ -342,35 +309,6 @@ export default class HomeScreen extends Component {
           </View>
         </ScrollView>
       </View>
-    );
-  }
-}
-
-
-
-HomeScreen.navigationOptions = {
-  header: null,
-};
-
-function DevelopmentModeNotice() {
-  if (__DEV__) {
-    const learnMoreButton = (
-      <Text onPress={handleLearnMorePress} style={styles.helpLinkText}>
-        Learn more
-      </Text>
-    );
-
-    return (
-      <Text style={styles.developmentModeText}>
-        Development mode is enabled: your app will be slower but you can use
-        useful development tools. {learnMoreButton}
-      </Text>
-    );
-  } else {
-    return (
-      <Text style={styles.developmentModeText}>
-        You are not in development mode: your app will run at full speed.
-      </Text>
     );
   }
 }
@@ -399,12 +337,6 @@ HomeScreen.navigationOptions = {
 function handleLearnMorePress() {
   WebBrowser.openBrowserAsync(
     'https://docs.expo.io/versions/latest/workflow/development-mode/'
-  );
-}
-
-function handleHelpPress() {
-  WebBrowser.openBrowserAsync(
-    'https://docs.expo.io/versions/latest/workflow/up-and-running/#cant-see-your-changes'
   );
 }
 
