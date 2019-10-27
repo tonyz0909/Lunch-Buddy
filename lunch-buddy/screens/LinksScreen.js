@@ -28,6 +28,23 @@ let addItem = item => {
 }
 
 export default class LinksScreen extends Component {
+  checkForFlakes = () => {
+    let user = fbase.auth().currentUser;
+    let db = fbase.firestore();
+    let profileRef = db.collection("users").doc(user.uid);
+    profileRef.onSnapshot(doc => {
+      if (doc.exists) {
+        data = doc.data();
+        this.setState({
+          flakeToday: data.flakeToday
+        });
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such user!");
+      }
+    });
+  }
+
   getRequest = () => {
     let user = fbase.auth().currentUser;
     let db = fbase.firestore();
@@ -116,9 +133,13 @@ export default class LinksScreen extends Component {
         location: "Chipotle Mexican Grill, 540 17th St NW #420, Atlanta, GA 30318",
         start: "11:30am",
         end: "1:30pm",
-      }
+      },
+      flakeToday: false
     };
     this.getRequest = this.getRequest.bind(this);
+    this.checkForFlakes = this.checkForFlakes.bind(this);
+    // first and foremost, check for flakes
+    this.checkForFlakes();
     this.getRequest();
   }
 
@@ -144,7 +165,7 @@ export default class LinksScreen extends Component {
     return (
       <ScrollView style={styles.container}>
         {
-          this.state.location ?
+          !this.state.flakeToday ?
             <View>
               {this.state.view === 'view' &&
                 <View>

@@ -84,7 +84,7 @@ export default class HomeScreen extends Component {
     let db = fbase.firestore();
     let profileRef = db.collection("requests").doc(user.uid);
     let matchID = await this.searchForMatch(this.state.lunchStartDateTime, this.state.lunchEndDateTime, this.state.locationPlaceID, user.uid);
-    let matched = this.matchID !== null;
+    let matched = matchID !== null;
     console.log("matched: " + matched)
     profileRef.set({
       userID: user.uid,
