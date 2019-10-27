@@ -122,11 +122,16 @@ export default class HomeScreen extends Component {
           style={styles.container}
           contentContainerStyle={styles.contentContainer}>
           <View style={styles.inputs}>
-            <ListItem
+            <ListItem 
               key={0}
-              title={<Text style={styles.boldText}>{"Enter Location:"}</Text>}
+              title={
+                <Text style={styles.times}>
+                  <Text style={styles.boldText}>{"Enter Location:"}</Text>
+                </Text>
+              }
               subtitle={
                 //TODO fix the double click 
+                <View style={styles.times}>
                 <GooglePlacesAutocomplete
                   placeholder='Location Search'
                   minLength={2}
@@ -140,6 +145,20 @@ export default class HomeScreen extends Component {
                       console.log(data.place_id)
                       this.handleLocationPicked(data.place_id)
                     }}
+                  styles={{
+                    textInputContainer: {
+                      backgroundColor: 'rgba(0,0,0,0)',
+                      borderTopWidth: 0,
+                      borderBottomWidth: 1,
+                      borderColor: "black",
+                    },
+                    textInput: { 
+                      fontWeight: '400',
+                    },
+                    description: { 
+                      fontWeight: '200',
+                    }
+                  }}
                   getDefaultValue={() => ''}
                   query={{
                     // available options: https://developers.google.com/places/web-service/autocomplete
@@ -152,6 +171,7 @@ export default class HomeScreen extends Component {
                     rankby: 'distance',
                   }}
                 />
+                </View>
               }
               bottomDivider
             />
@@ -290,6 +310,7 @@ const styles = StyleSheet.create({
   times: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    alignItems: 'flex-start',
     margin: 10
   },
   button: {
