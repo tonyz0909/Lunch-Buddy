@@ -77,11 +77,11 @@ export default class LoginScreen extends Component {
             onPress={() => this.signInWithFacebook()}
           />
 
-          <Button 
+          {/* <Button 
             title="Direct Enter"
             style={styles.loginButton}
             onPress={() => this.props.navigation.navigate('Main')}
-          />
+          /> */}
         </View>
       </View>
     );

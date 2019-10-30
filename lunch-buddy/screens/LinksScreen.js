@@ -460,7 +460,8 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 15,
     backgroundColor: '#ffffff',
-    padding: 10
+    padding: 10,
+    alignItems: 'center'
   },
   color: {
     backgroundColor: '#ffb380',
